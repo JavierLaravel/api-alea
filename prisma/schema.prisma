@@ -1,0 +1,1899 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model acabados {
+  id               Int                @id @default(autoincrement())
+  nombre           String             @db.VarChar(50)
+  descripcion      String             @db.VarChar(50)
+  estado           acabados_estado    @default(ACTIVO)
+  formula_rangos   formula_rangos[]
+  presentations    presentations[]
+  product_acabados product_acabados[]
+}
+
+model areas {
+  id                Int          @id @default(autoincrement())
+  nombre            String       @db.VarChar(50)
+  director          String?      @db.VarChar(50)
+  estado            areas_estado @default(ACTIVO)
+  username_digita   String?      @db.VarChar(40)
+  username_modifica String?      @db.VarChar(40)
+  created_at        DateTime?    @db.DateTime(0)
+  updated_at        DateTime?    @default(now()) @db.DateTime(0)
+  salidas           salidas[]
+}
+
+model armados {
+  id                BigInt         @id @default(autoincrement())
+  id_saleDetails    BigInt
+  detalle           String?        @db.VarChar(500)
+  n_pedido          String?        @db.VarChar(10)
+  u_ingresadas      Int
+  z_origen          Int
+  z_destino         Int
+  u_salida          Int?
+  unds_fin          Int?
+  estado            armados_estado @default(ARMADO)
+  created_at        DateTime?      @db.DateTime(0)
+  username_digita   String?        @db.VarChar(50)
+  updated_at        DateTime?      @db.DateTime(0)
+  username_modifica String?        @db.VarChar(50)
+  fecha_created     DateTime?      @db.DateTime(0)
+  f_fin             DateTime?      @db.DateTime(0)
+  observa_id        String?        @db.VarChar(250)
+  pnc               String?        @default("0") @db.VarChar(6)
+  detalle_material  String?        @db.VarChar(5)
+  wpnc              Int?           @default(0)
+  fecha_lote        DateTime?      @db.DateTime(0)
+
+  @@index([id_saleDetails], map: "fk_idSale_details")
+}
+
+model canal {
+  id       Int        @id @default(autoincrement())
+  nombre   String     @db.VarChar(30)
+  products products[]
+}
+
+model categoria_ventas {
+  id              Int                     @id @default(autoincrement())
+  linea_ventas_id Int
+  nombre          String                  @db.VarChar(100)
+  estado          categoria_ventas_estado
+
+  @@index([linea_ventas_id], map: "linea_ventas_id")
+}
+
+model categories {
+  id                Int               @id @default(autoincrement())
+  nombre            String            @db.VarChar(80)
+  alias             String            @db.VarChar(10)
+  lista             String?           @db.VarChar(40)
+  created_at        DateTime?         @db.Timestamp(0)
+  username_digita   String?           @db.VarChar(30)
+  updated_at        DateTime?         @db.Timestamp(0)
+  username_modifica String?           @db.VarChar(30)
+  estado            categories_estado @default(ACTIVO)
+  products          products[]
+}
+
+model clasifica_collections {
+  id                BigInt                       @id @default(autoincrement())
+  nombre            String                       @db.VarChar(200)
+  descripcion       String                       @db.VarChar(100)
+  alias             String                       @db.VarChar(20)
+  estado            clasifica_collections_estado @default(VIGENTE)
+  username_digita   String?                      @db.VarChar(100)
+  created_at        DateTime?                    @db.DateTime(0)
+  username_modifica String?                      @db.VarChar(100)
+  updated_at        DateTime?                    @db.DateTime(0)
+  products          products[]
+}
+
+model comercials {
+  id                Int       @id @default(autoincrement())
+  nombre            String    @db.VarChar(50)
+  email             String    @db.VarChar(80)
+  num_documento     Int
+  movil             String    @db.VarChar(20)
+  estado            String    @default("ACTIVO") @db.VarChar(15)
+  username_digita   String?   @db.VarChar(40)
+  created_at        DateTime? @db.Timestamp(0)
+  username_modifica String?   @db.VarChar(40)
+  updated_at        DateTime? @db.Timestamp(0)
+}
+
+model complementos {
+  id                Int                 @id @default(autoincrement())
+  id_products       Int
+  referencia        String?             @db.VarChar(50)
+  refmoldes         String              @db.VarChar(50)
+  piezas            Int                 @default(1)
+  id_lineas         Int?
+  injerto           Int?                @default(0)
+  nota              String?             @default("N.A") @db.VarChar(40)
+  estado            complementos_estado @default(VIGENTE)
+  fecha_ing         DateTime?           @db.Date
+  created_at        DateTime?           @db.DateTime(0)
+  username_digita   String?             @db.VarChar(50)
+  updated_at        DateTime?           @db.DateTime(0)
+  username_modifica String?             @db.VarChar(50)
+  products          products            @relation(fields: [id_products], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "complementos_ibfk_1")
+  resultados        resultados[]
+
+  @@index([id_products], map: "FK_PROD_COMPL")
+  @@index([id_lineas], map: "fk_lienas")
+}
+
+model conforme_materials {
+  id          Int    @id @default(autoincrement())
+  descripcion String @db.VarChar(50)
+}
+
+model conformes {
+  id     BigInt @id @default(autoincrement())
+  nombre String @db.VarChar(60)
+}
+
+model cotiza_gals {
+  id                Int       @id @default(autoincrement())
+  ni                Float?    @db.Float
+  s_ni              Float?    @db.Float
+  cl_ni             Float?    @db.Float
+  hbo_ni            Float?    @db.Float
+  tecnibrite_ni     Float?    @db.Float
+  bpn_ni            Float?    @db.Float
+  an_cu             Float?    @db.Float
+  ci_cu             Float?    @db.Float
+  ci_na_cu          Float?    @db.Float
+  ci_k_cu           Float?    @db.Float
+  brigthner_cu      Float?    @db.Float
+  wetting_cu        Float?    @db.Float
+  pr_ni             Int?
+  pr_s_ni           Int?
+  pr_cl_ni          Int?
+  pr_hbo_ni         Int?
+  pr_tecnibrite_ni  Int?
+  pr_bpn_ni         Int?
+  pr_an_cu          Int?
+  pr_ci_cu          Int?
+  pr_ci_na_cu       Int?
+  pr_ci_k_cu        Int?
+  pr_brigthner_cu   Int?
+  pr_wetting_cu     Int?
+  kg_proces         Float?    @db.Float
+  vlr_zamac         Int
+  username_modifica String?   @db.VarChar(40)
+  created_at        DateTime? @db.DateTime(0)
+  updated_at        DateTime? @db.DateTime(0)
+}
+
+model cotiza_ggfs {
+  id                BigInt             @id @default(autoincrement())
+  id_linea          Int
+  valor             Float              @db.Float
+  estado            cotiza_ggfs_estado @default(VIGENTE)
+  ano               Int
+  username_digita   String?            @db.VarChar(80)
+  created_at        DateTime?          @db.DateTime(0)
+  username_modifica String?            @db.VarChar(80)
+  updated_at        DateTime?          @db.DateTime(0)
+
+  @@index([id_linea], map: "fk_idlinea")
+}
+
+model cotiza_lineas {
+  id                Int                  @id @default(autoincrement())
+  id_linea          Int
+  valor             Float                @db.Float
+  estado            cotiza_lineas_estado
+  username_digita   String               @db.VarChar(80)
+  created_at        DateTime             @default(now()) @db.DateTime(0)
+  username_modifica String?              @db.VarChar(80)
+  updated_at        DateTime?            @db.DateTime(0)
+  ano               Int
+}
+
+model cotiza_moldes {
+  id                BigInt                 @id @default(autoincrement())
+  diametro          cotiza_moldes_diametro
+  valor             Decimal                @db.Decimal(8, 0)
+  vulcanizado       Decimal                @db.Decimal(8, 0)
+  mo                Decimal                @db.Decimal(8, 0)
+  total             Decimal                @db.Decimal(8, 2)
+  estado            cotiza_moldes_estado   @default(VIGENTE)
+  username_digita   String?                @db.VarChar(80)
+  created_at        DateTime?              @db.DateTime(0)
+  username_modifica String?                @db.VarChar(80)
+  updated_at        DateTime?              @db.DateTime(0)
+}
+
+model cotiza_mos {
+  id                Int       @id @default(autoincrement())
+  n_moldes          Int
+  sum_salarios      Decimal   @db.Decimal(10, 0)
+  total             Decimal   @db.Decimal(10, 0)
+  id_linea          Int
+  ano               Int
+  username_digita   String?   @db.VarChar(60)
+  created_at        String?   @db.VarChar(80)
+  username_modifica String?   @db.VarChar(80)
+  updated_at        DateTime? @db.DateTime(0)
+
+  @@index([id_linea], map: "fk_linea")
+}
+
+model cotiza_mosals {
+  id                Int                  @id @default(autoincrement())
+  id_linea          Int                  @default(1)
+  salario           Float                @db.Float
+  ano               Int
+  dias              Float                @db.Float
+  horas             Float                @db.Float
+  minutos           Float                @db.Float
+  segundos          Float                @db.Float
+  linea             Float                @db.Float
+  username_digita   String               @db.VarChar(80)
+  created_at        DateTime             @default(now()) @db.DateTime(0)
+  username_modifica String?              @db.VarChar(80)
+  updated_at        DateTime?            @db.DateTime(0)
+  estado            cotiza_mosals_estado
+}
+
+model cotiza_params {
+  id                Int       @id @default(autoincrement())
+  id_linea          Int?
+  nombre            String    @db.VarChar(40)
+  descripcion       String?   @db.VarChar(80)
+  valor             Float     @db.Float
+  created_at        DateTime? @db.DateTime(0)
+  updated_at        DateTime? @db.DateTime(0)
+  username_modifica String?   @db.VarChar(40)
+  username_digita   String?   @db.VarChar(40)
+}
+
+model cotizacion_refs {
+  id                BigInt                  @id @default(autoincrement())
+  idproveedor       Int
+  nombre_cliente    String                  @db.VarChar(40)
+  id_linea          Int
+  nombre            String                  @db.VarChar(40)
+  referencia        String                  @db.VarChar(40)
+  estado            cotizacion_refs_estado? @default(CREADA)
+  username_digita   String                  @db.VarChar(40)
+  username_modifica String                  @db.VarChar(40)
+  created_at        String                  @db.VarChar(40)
+  updated_at        String                  @db.VarChar(40)
+}
+
+model cotizacions {
+  id                BigInt              @id @default(autoincrement())
+  updated_at        DateTime?           @db.DateTime(0)
+  created_at        DateTime?           @db.DateTime(0)
+  username_modifica String?             @db.VarChar(40)
+  username_digita   String?             @db.VarChar(40)
+  id_cotiza         BigInt
+  nombre_cliente    String?             @db.VarChar(40)
+  nombre            String?             @db.VarChar(40)
+  id_linea          Int?
+  id_molde          Int?
+  id_material       Int?
+  pesob             Float?              @db.Float
+  peson             Float?              @db.Float
+  costo_m           Float?              @db.Float
+  unidades_m        Float?              @db.Float
+  pasadas_m         Float?              @db.Float
+  u_ggf             Float?              @db.Float
+  zamac             Float?              @db.Float
+  decoracion        Float?              @db.Float
+  centrifuga        Float?              @db.Float
+  galv_nq           Float?              @db.Float
+  pulido            Float?              @db.Float
+  pintura           Float?              @db.Float
+  montaje           Float?              @db.Float
+  terminado         Float?              @db.Float
+  satinado          Float?              @db.Float
+  corte             Float?              @db.Float
+  embutido          Float?              @db.Float
+  estampado         Float?              @db.Float
+  mecanizado        Float?              @db.Float
+  tornillo          Float?              @db.Float
+  troquel           Float?              @db.Float
+  cto_prototipo     Float?              @db.Float
+  udscliente        Float?              @db.Float
+  otros             Float?              @db.Float
+  id_parte          Int?
+  cst_parte         Float?              @db.Float
+  partes            Float?              @db.Float
+  nro_empaque       String?             @db.VarChar(5)
+  empaque_cto       Float?              @db.Float
+  cto_oro           Float?              @db.Float
+  area_dor          Float?              @db.Float
+  total_o           Float               @default(0) @db.Float
+  vobo              Float?              @db.Float
+  vlr_dor_pvp       Float?              @db.Float
+  referencia        String?             @db.VarChar(40)
+  padre             Int?
+  val               String?             @db.VarChar(150)
+  estado            cotizacions_estado? @default(CREADA)
+}
+
+model despacho_details {
+  id                BigInt                  @id @default(autoincrement())
+  id_despacho       BigInt
+  id_producto       Int
+  id_acabado        Int
+  id_saleDetails    BigInt
+  cantidad          Int
+  valor_unitario    Decimal                 @db.Decimal(10, 2)
+  valor_molde       Decimal                 @default(0.00) @db.Decimal(10, 2)
+  estado            despacho_details_estado @default(DESPACHADO)
+  username_digita   String?                 @db.VarChar(80)
+  created_at        DateTime?               @db.DateTime(0)
+  username_modifica String?                 @db.VarChar(80)
+  updated_at        DateTime?               @db.DateTime(0)
+  obsequio          Int                     @default(0)
+  id_sale           BigInt
+
+  @@index([id_despacho], map: "fk_despacho")
+  @@index([id_acabado], map: "fk_presentations")
+  @@index([id_producto], map: "fk_producto")
+}
+
+model despachos {
+  id                BigInt           @id @default(autoincrement())
+  id_persona        Int
+  estado            despachos_estado @default(DESPACHADO)
+  comprobante       Int
+  serial            Int
+  observacion       String?          @db.VarChar(160)
+  username_digita   String?          @db.VarChar(80)
+  created_at        DateTime?        @db.DateTime(0)
+  username_modifica String?          @db.VarChar(80)
+  updated_at        DateTime?        @db.DateTime(0)
+
+  @@index([id_persona], map: "fk_persona")
+}
+
+model despachotemp_details {
+  id                BigInt                      @id @default(autoincrement())
+  id_despacho       BigInt
+  id_producto       Int
+  id_acabado        Int
+  id_saleDetails    BigInt
+  cantidad          Int
+  valor_unitario    Decimal                     @db.Decimal(10, 2)
+  valor_molde       Decimal                     @default(0.00) @db.Decimal(10, 2)
+  estado            despachotemp_details_estado @default(DESPACHADO)
+  username_digita   String?                     @db.VarChar(80)
+  created_at        DateTime?                   @db.DateTime(0)
+  username_modifica String?                     @db.VarChar(80)
+  updated_at        DateTime?                   @db.DateTime(0)
+  obsequio          Int                         @default(0)
+  id_sale           BigInt
+
+  @@index([id_despacho], map: "fk_despacho")
+  @@index([id_acabado], map: "fk_presentations")
+  @@index([id_producto], map: "fk_producto")
+  @@index([id_sale], map: "fk_sale")
+}
+
+model despachotemps {
+  id                BigInt               @id @default(autoincrement())
+  id_persona        Int
+  estado            despachotemps_estado @default(DESPACHADO)
+  comprobante       Int
+  serial            Int
+  observacion       String?              @db.VarChar(160)
+  username_digita   String?              @db.VarChar(80)
+  created_at        DateTime?            @db.DateTime(0)
+  username_modifica String?              @db.VarChar(80)
+  updated_at        DateTime?            @db.DateTime(0)
+
+  @@index([id_persona], map: "fk_persona")
+}
+
+model failed_jobs {
+  id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  uuid       String   @unique(map: "failed_jobs_uuid_unique") @db.VarChar(255)
+  connection String   @db.Text
+  queue      String   @db.Text
+  payload    String   @db.LongText
+  exception  String   @db.LongText
+  failed_at  DateTime @default(now()) @db.Timestamp(0)
+}
+
+model formula2 {
+  id                Int             @id @default(autoincrement())
+  id_base1          Int
+  id_base2          Int
+  id_base3          Int
+  id_presentation   Int
+  estado            formula2_estado @default(VIGENTE)
+  username_digita   String?         @db.VarChar(40)
+  created_at        DateTime?       @db.DateTime(0)
+  username_modifica String?         @db.VarChar(40)
+  updated_at        DateTime?       @db.DateTime(0)
+
+  @@index([id_presentation], map: "fk_presentation")
+}
+
+model formula_rangos {
+  id                Int                   @id @default(autoincrement())
+  id_presentation   Int
+  id_acabado        Int
+  r1                Int
+  r2                Int
+  estado            formula_rangos_estado @default(VIGENTE)
+  username_digita   String?               @db.VarChar(40)
+  created_at        DateTime?             @db.DateTime(0)
+  username_modifica String?               @db.VarChar(40)
+  updated_at        DateTime              @default(now()) @db.Timestamp(0)
+  acabados          acabados              @relation(fields: [id_acabado], references: [id], onUpdate: Restrict, map: "formula_rangos_ibfk_1")
+
+  @@index([id_acabado], map: "fk_acabado")
+}
+
+model grupos {
+  id       Int        @id @default(autoincrement())
+  nombre   String     @db.VarChar(15)
+  personas personas[]
+}
+
+model ingreso_detalles {
+  id                Int                      @id @default(autoincrement())
+  id_ingresos       Int
+  id_insumos        Int
+  cantidad          Decimal                  @db.Decimal(15, 2)
+  tipo_mov          Int?                     @default(1)
+  valor             Decimal                  @db.Decimal(20, 2)
+  username_digita   String?                  @db.VarChar(40)
+  created_at        DateTime?                @db.DateTime(0)
+  username_modifica String?                  @db.VarChar(40)
+  updated_at        DateTime                 @default(now()) @db.DateTime(0)
+  fecha_cierre      DateTime?                @db.DateTime(0)
+  username_cierre   String?                  @db.VarChar(50)
+  cierre            ingreso_detalles_cierre? @default(NO)
+  ingresos          ingresos                 @relation(fields: [id_ingresos], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ingreso_detalles_ibfk_1")
+  misinsumos        misinsumos               @relation(fields: [id_insumos], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ingreso_detalles_ibfk_2")
+
+  @@index([id_ingresos], map: "fk_ingreso")
+  @@index([id_insumos], map: "fk_misinsumos")
+}
+
+model ingresos {
+  id                Int                       @id @default(autoincrement())
+  id_proveedor      Int
+  id_area           Int?
+  orden             String?                   @db.VarChar(20)
+  comprobante       String                    @db.VarChar(12)
+  tipo_comprobante  ingresos_tipo_comprobante @default(REMISION)
+  observacion       String                    @db.VarChar(90)
+  estado            ingresos_estado           @default(VIGENTE)
+  total             Decimal                   @db.Decimal(25, 2)
+  username_digita   String?                   @db.VarChar(40)
+  created_at        DateTime?                 @db.DateTime(0)
+  username_modifica String?                   @db.VarChar(40)
+  updated_at        DateTime                  @default(now()) @db.DateTime(0)
+  ingreso_detalles  ingreso_detalles[]
+  providers         providers                 @relation(fields: [id_proveedor], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ingresos_ibfk_1")
+
+  @@index([id_proveedor], map: "fk_proveedor")
+}
+
+model insumo_detalles {
+  id                Int                    @id @default(autoincrement())
+  id_insumo         Int
+  id_producto       Int
+  cantidad          Decimal                @db.Decimal(10, 4)
+  neto              Decimal                @default(0.0000) @db.Decimal(10, 4)
+  medida            String?                @db.VarChar(20)
+  price             Decimal?               @db.Decimal(10, 2)
+  estado            insumo_detalles_estado @default(VIGENTE)
+  username_digita   String?                @db.VarChar(40)
+  created_at        DateTime?              @db.DateTime(0)
+  username_modifica String?                @db.VarChar(40)
+  updated_at        DateTime               @default(dbgenerated("('0000-00-00 00:00:00')")) @db.Timestamp(0)
+  products          products               @relation(fields: [id_producto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "insumo_detalles_ibfk_1")
+  misinsumos        misinsumos             @relation(fields: [id_insumo], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "insumo_detalles_ibfk_2")
+
+  @@index([id_insumo], map: "fk_insumoDetalle")
+  @@index([id_producto], map: "fk_producto_insumo")
+}
+
+model insumos {
+  id                Int      @id @default(autoincrement())
+  nombre            String   @db.VarChar(50)
+  username_digita   String?  @db.VarChar(40)
+  created_at        DateTime @default(now()) @db.Timestamp(0)
+  username_modifica String?  @db.VarChar(40)
+  updated_at        DateTime @default(now()) @db.Timestamp(0)
+}
+
+model items {
+  id                BigInt    @id @default(autoincrement())
+  linea             String    @db.VarChar(10)
+  pedido            String    @db.VarChar(10)
+  refmoldes         String    @db.VarChar(100)
+  acabado           String    @db.VarChar(10)
+  unidades          Int
+  username_digita   String    @db.VarChar(80)
+  fecha_reprograma  DateTime  @db.DateTime(0)
+  created_at        DateTime  @db.DateTime(0)
+  username_modifica String?   @db.VarChar(80)
+  updated_at        DateTime? @db.Timestamp(0)
+}
+
+model jobs {
+  id           BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+  queue        String @db.VarChar(255)
+  payload      String @db.LongText
+  attempts     Int    @db.UnsignedTinyInt
+  reserved_at  Int?   @db.UnsignedInt
+  available_at Int    @db.UnsignedInt
+  created_at   Int    @db.UnsignedInt
+
+  @@index([queue], map: "jobs_queue_index")
+}
+
+model linea_ventas {
+  id          Int                  @id @default(autoincrement())
+  nombre      String?              @db.VarChar(25)
+  descripcion String?              @db.VarChar(100)
+  estado      linea_ventas_estado? @default(VIGENTE)
+}
+
+model lineas {
+  id                Int          @id @default(autoincrement())
+  nombre            String       @db.VarChar(50)
+  alias             String       @db.VarChar(6)
+  tipo              String       @default("P") @db.VarChar(2)
+  username_digita   String       @db.VarChar(40)
+  created_at        DateTime     @default(now()) @db.Timestamp(0)
+  username_modifica String       @db.VarChar(40)
+  updated_at        DateTime     @default(now()) @db.Timestamp(0)
+  resultados        resultados[]
+}
+
+model lista_detalles {
+  id                BigInt    @id @default(autoincrement())
+  id_lista          BigInt
+  acabado           String    @db.VarChar(50)
+  descripcion       String    @db.VarChar(80)
+  caja              Int
+  cantidad          Int
+  unidad            String?   @default("UNIDAD") @db.VarChar(20)
+  updated_at        DateTime? @db.DateTime(0)
+  username_modifica String?   @db.VarChar(40)
+  created_at        DateTime? @db.DateTime(0)
+  username_digita   String?   @db.VarChar(40)
+
+  @@index([id_lista], map: "fk_lista")
+}
+
+model listas {
+  id                BigInt        @id @default(autoincrement())
+  id_persona        Int
+  estado            listas_estado @default(GENERADA)
+  total             Int
+  pallet            Int
+  ncajas            Int
+  wbruto            Decimal       @db.Decimal(10, 2)
+  wneto             Decimal       @db.Decimal(10, 2)
+  created_at        DateTime?     @db.DateTime(0)
+  username_digita   String?       @db.VarChar(40)
+  updated_at        DateTime?     @default(now()) @db.DateTime(0)
+  username_modifica String?       @db.VarChar(40)
+
+  @@index([id_persona], map: "fk_persona")
+}
+
+model log_inventario_categorias {
+  id                 BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  categoria          String?   @db.VarChar(255)
+  inventario_inicial String?   @db.VarChar(255)
+  reubicacion        String?   @db.VarChar(255)
+  entradas_del_mes   String?   @db.VarChar(255)
+  consumos_del_mes   String?   @db.VarChar(255)
+  inventario_final   String?   @db.VarChar(255)
+  diferencia_ent_sal String?   @db.VarChar(255)
+  fi                 DateTime? @db.Timestamp(0)
+  ff                 DateTime? @db.Timestamp(0)
+  prioridad          Int
+  created_at         DateTime? @db.Timestamp(0)
+  updated_at         DateTime? @db.Timestamp(0)
+}
+
+model log_inventario_detalles {
+  id              BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  division        String?   @db.VarChar(255)
+  codigo          String?   @db.VarChar(255)
+  seccion         String?   @db.VarChar(60)
+  producto        String?   @db.VarChar(255)
+  unidad          String?   @db.VarChar(255)
+  vrunitario      String?   @db.VarChar(255)
+  cantinicial     String?   @db.VarChar(255)
+  totalinvinicial String?   @db.VarChar(255)
+  entradas        String?   @db.VarChar(255)
+  totalentradas   String?   @db.VarChar(255)
+  salidas         String?   @db.VarChar(255)
+  totalsalidas    String?   @db.VarChar(255)
+  cantfinal       String?   @db.VarChar(255)
+  vrfinal         String?   @db.VarChar(255)
+  fi              DateTime? @db.Date
+  ff              DateTime? @db.Date
+  prioridad       String?   @db.VarChar(11)
+  cierre          Int?      @default(1)
+  created_at      DateTime? @db.Timestamp(0)
+  updated_at      DateTime? @db.Timestamp(0)
+}
+
+model messages {
+  id                                 Int             @id @default(autoincrement())
+  subject                            String?         @db.VarChar(30)
+  body                               String          @db.VarChar(500)
+  from_user_id                       BigInt          @db.UnsignedBigInt
+  to_user_id                         BigInt          @db.UnsignedBigInt
+  created_at                         DateTime        @db.DateTime(0)
+  updated_at                         DateTime        @default(now()) @db.DateTime(0)
+  estado                             messages_estado @default(ACTIVA)
+  users_messages_to_user_idTousers   users           @relation("messages_to_user_idTousers", fields: [to_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "messages_ibfk_1")
+  users_messages_from_user_idTousers users           @relation("messages_from_user_idTousers", fields: [from_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "messages_ibfk_2")
+
+  @@index([from_user_id], map: "fk_user")
+  @@index([to_user_id], map: "fk_user_to")
+}
+
+model migrations {
+  id        Int    @id @default(autoincrement()) @db.UnsignedInt
+  migration String @db.VarChar(255)
+  batch     Int
+}
+
+model misinsumos {
+  id                Int                  @id @default(autoincrement())
+  nombre            String               @db.VarChar(100)
+  tipo              misinsumos_tipo?
+  area              misinsumos_area?
+  prioridad         Int?                 @default(1)
+  unidad            String               @db.VarChar(20)
+  rotacion          misinsumos_rotacion?
+  stock             Decimal?             @default(0.00) @db.Decimal(18, 2)
+  ultimo_ingreso    DateTime?            @db.DateTime(0)
+  minimo            Int                  @default(0)
+  estado            misinsumos_estado    @default(ACTIVO)
+  val_unitario      Float?               @db.Float
+  precio_anterior   Decimal?             @default(0) @db.Decimal(10, 0)
+  username_digita   String?              @db.VarChar(40)
+  created_at        DateTime?            @db.DateTime(0)
+  username_modifica String?              @db.VarChar(40)
+  updated_at        DateTime?            @default(now()) @db.Timestamp(0)
+  ingreso_detalles  ingreso_detalles[]
+  insumo_detalles   insumo_detalles[]
+  salida_detalles   salida_detalles[]
+}
+
+model model_has_permissions {
+  permission_id BigInt      @db.UnsignedBigInt
+  model_type    String      @db.VarChar(255)
+  model_id      BigInt      @db.UnsignedBigInt
+  permissions   permissions @relation(fields: [permission_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "model_has_permissions_permission_id_foreign")
+
+  @@id([permission_id, model_id, model_type])
+  @@index([model_id, model_type], map: "model_has_permissions_model_id_model_type_index")
+}
+
+model model_has_roles {
+  role_id    BigInt @db.UnsignedBigInt
+  model_type String @db.VarChar(255)
+  model_id   BigInt @db.UnsignedBigInt
+
+  @@id([role_id, model_id, model_type])
+  @@index([model_id, model_type], map: "model_has_roles_model_id_model_type_index")
+}
+
+model molde_temps {
+  id               Int                    @id @default(autoincrement())
+  id_producto      Int
+  id_complemento   Int?
+  num              Int
+  unidades         Int
+  peso             Int?                   @default(0)
+  diametro         Int
+  estimado         Int?                   @default(250)
+  observacion      String?                @db.VarChar(60)
+  nota             String?                @db.VarChar(50)
+  uso              Int                    @default(0)
+  saldo            Int                    @default(250)
+  estado           molde_temps_estado     @default(VIGENTE)
+  tipo             molde_temps_tipo
+  disponible       molde_temps_disponible @default(SI)
+  usuario_digita   String?                @db.VarChar(40)
+  created_at       DateTime?              @db.Timestamp(0)
+  usuario_modifica String?                @db.VarChar(40)
+  updated_at       DateTime?              @db.Timestamp(0)
+  user_baja        String?                @db.VarChar(40)
+  fecha_baja       DateTime?              @db.DateTime(0)
+  obs              String?                @db.Text
+  products         products               @relation(fields: [id_producto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "moldes_ibfk_11")
+
+  @@index([id_complemento], map: "FK_COMPLEMENTO1")
+  @@index([id_producto], map: "fk_producto1")
+}
+
+model moldes {
+  id               Int               @id @default(autoincrement())
+  id_producto      Int
+  id_complemento   Int?
+  num              Int
+  unidades         Int
+  peso             Decimal?          @default(0.00) @db.Decimal(5, 2)
+  diametro         Int
+  estimado         Int?              @default(250)
+  observacion      String?           @db.VarChar(60)
+  nota             String?           @db.VarChar(50)
+  uso              Int               @default(0)
+  saldo            Int               @default(250)
+  estado           moldes_estado     @default(VIGENTE)
+  tipo             moldes_tipo
+  disponible       moldes_disponible @default(SI)
+  usuario_digita   String?           @db.VarChar(40)
+  created_at       DateTime?         @db.Timestamp(0)
+  usuario_modifica String?           @db.VarChar(40)
+  updated_at       DateTime?         @db.Timestamp(0)
+  user_baja        String?           @db.VarChar(40)
+  fecha_baja       DateTime?         @db.DateTime(0)
+  products         products          @relation(fields: [id_producto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "moldes_ibfk_1")
+
+  @@index([id_complemento], map: "FK_COMPLEMENTO")
+  @@index([id_producto], map: "fk_producto")
+}
+
+model movimientos {
+  id                   Int                @id @default(autoincrement())
+  id_productionDetails BigInt
+  detalle              String             @db.VarChar(100)
+  n_pedido             String             @db.VarChar(10)
+  u_ingresadas         Int
+  estado               movimientos_estado
+  z_origen             Int
+  z_destino            Int
+  u_salida             Int
+  username_digita      String             @db.VarChar(40)
+  created_at           DateTime           @db.DateTime(0)
+  username_modifica    String?            @db.VarChar(40)
+  updated_at           DateTime?          @db.DateTime(0)
+  f_fin                DateTime?          @db.DateTime(0)
+  unds_fin             Int?
+  pnc                  String?            @default("0") @db.VarChar(6)
+  detalle_material     String?            @db.VarChar(5)
+  wpnc                 Int?               @default(0)
+
+  @@index([id_productionDetails], map: "id_productionDetails")
+}
+
+model muestra_moldes {
+  id          BigInt    @id @default(autoincrement())
+  id_producto Int
+  cantidad    Int
+  id_orden    BigInt
+  updated_at  DateTime? @db.Date
+  created_at  DateTime? @db.Date
+
+  @@index([id_orden], map: "fk_orden")
+  @@index([id_producto], map: "fk_producto")
+}
+
+model municipios {
+  id            Int    @id @default(autoincrement())
+  cod_dane      Int
+  departamentos String @db.VarChar(60)
+  municipios    String @db.VarChar(60)
+  alias         String @db.VarChar(60)
+}
+
+model nichos {
+  id                Int       @id @default(autoincrement())
+  nombre            String    @db.VarChar(50)
+  username_digita   String?   @db.VarChar(40)
+  username_modifica String?   @db.VarChar(40)
+  created_at        DateTime? @db.DateTime(0)
+  updated_at        DateTime? @default(now()) @db.DateTime(0)
+}
+
+model notifications {
+  id              String    @id @db.VarChar(36)
+  type            String    @db.VarChar(255)
+  notifiable_type String    @db.VarChar(255)
+  notifiable_id   BigInt    @db.UnsignedBigInt
+  mensaje_id      Int?
+  data            String    @db.Text
+  read_at         DateTime? @db.Timestamp(0)
+  created_at      DateTime? @db.Timestamp(0)
+  updated_at      DateTime? @db.Timestamp(0)
+
+  @@index([notifiable_type, notifiable_id], map: "notifications_notifiable_type_notifiable_id_index")
+}
+
+model operators {
+  id                    BigInt    @id @default(autoincrement())
+  id_production_details BigInt
+  c_realizado           Int
+  operario              Int
+  peso                  Decimal   @db.Decimal(8, 0)
+  unidades              Decimal   @db.Decimal(10, 0)
+  detalle               String?   @db.VarChar(100)
+  username_digita       String?   @db.VarChar(80)
+  created_at            DateTime? @db.DateTime(0)
+  username_modifica     String?   @db.VarChar(80)
+  updated_at            DateTime? @db.DateTime(0)
+
+  @@index([id_production_details], map: "fk_id_productions")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model password_resets {
+  email      String    @db.VarChar(255)
+  token      String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+
+  @@index([email], map: "password_resets_email_index")
+  @@ignore
+}
+
+model permissions {
+  id                    BigInt                  @id @default(autoincrement()) @db.UnsignedBigInt
+  name                  String                  @db.VarChar(255)
+  guard_name            String                  @db.VarChar(255)
+  created_at            DateTime?               @db.Timestamp(0)
+  updated_at            DateTime?               @db.Timestamp(0)
+  model_has_permissions model_has_permissions[]
+
+  @@unique([name, guard_name], map: "permissions_name_guard_name_unique")
+}
+
+model personas {
+  id                         Int                   @id @default(autoincrement())
+  tipo_persona               String                @default("Cliente") @db.VarChar(15)
+  cod_cliente                Int?
+  nombre                     String?               @db.VarChar(150)
+  num_documento              String                @db.VarChar(15)
+  representante              String?               @db.VarChar(120)
+  email                      String?               @db.VarChar(100)
+  direccion                  String?               @db.VarChar(100)
+  barrio                     String?               @db.VarChar(70)
+  ciudad                     String?               @db.VarChar(100)
+  alias                      String?               @db.VarChar(80)
+  pais                       String?               @db.VarChar(30)
+  telefono                   String?               @db.VarChar(40)
+  descuento                  Int                   @default(0)
+  team                       Int?
+  cliente_top                personas_cliente_top  @default(NO)
+  lista                      Int?
+  tipo                       personas_tipo?
+  tipo_venta                 personas_tipo_venta   @default(NACIONAL)
+  nick                       String?               @db.VarChar(20)
+  nicho_id                   Int?
+  linea_venta_id             Int?
+  categorias_lineas_venta_id Int?
+  observacion_nicho          String?               @db.VarChar(180)
+  fecha_registro             DateTime?             @db.Date
+  created_at                 DateTime?             @default(now()) @db.Timestamp(0)
+  username_digita            String?               @db.VarChar(90)
+  departamento               String?               @db.VarChar(30)
+  cupo                       Int?                  @default(0)
+  observacion                String?               @db.VarChar(150)
+  dias_credito               personas_dias_credito @default(DIAMETRO_0)
+  estado                     String?               @default("DESHABILITADO") @db.VarChar(15)
+  vigente                    personas_vigente      @default(SI)
+  updated_at                 DateTime?             @db.Timestamp(0)
+  username_modifica          String?               @db.VarChar(90)
+  grupos                     grupos?               @relation(fields: [lista], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "personas_ibfk_1")
+  sales                      sales[]
+  temps                      temps[]
+
+  @@index([lista], map: "GRUPO_LIST_TIP")
+  @@index([nicho_id], map: "fk_nicho")
+  @@index([team], map: "fk_team_comercial")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model personasss {
+  id                Int
+  tipo_persona      String                  @default("Cliente") @db.VarChar(15)
+  cod_cliente       Int?
+  nombre            String?                 @db.VarChar(150)
+  num_documento     String                  @db.VarChar(15)
+  representante     String?                 @db.VarChar(120)
+  email             String?                 @db.VarChar(100)
+  direccion         String?                 @db.VarChar(100)
+  barrio            String?                 @db.VarChar(70)
+  ciudad            String?                 @db.VarChar(100)
+  alias             String?                 @db.VarChar(80)
+  pais              String?                 @db.VarChar(30)
+  telefono          String?                 @db.VarChar(40)
+  descuento         Int                     @default(0)
+  team              Int?
+  lista             Int?
+  tipo              personasss_tipo?
+  nick              String?                 @db.VarChar(15)
+  created_at        DateTime?               @default(now()) @db.Timestamp(0)
+  username_digita   String?                 @db.VarChar(90)
+  departamento      String?                 @db.VarChar(30)
+  cupo              Int?                    @default(0)
+  observacion       String?                 @db.VarChar(150)
+  dias_credito      personasss_dias_credito @default(DIAMETRO_0)
+  estado            String?                 @default("DESHABILITADO") @db.VarChar(15)
+  vigente           personasss_vigente      @default(SI)
+  updated_at        DateTime?               @db.Timestamp(0)
+  username_modifica String?                 @db.VarChar(90)
+
+  @@ignore
+}
+
+model presentations {
+  id                          Int                           @id @default(autoincrement())
+  alias                       String                        @db.VarChar(20)
+  nombre                      String?                       @db.VarChar(50)
+  estado                      presentations_estado?         @default(ACTIVO)
+  id_base                     Int
+  hexa                        String?                       @db.VarChar(15)
+  variacion                   Int                           @default(0)
+  data                        presentations_data            @default(DEPENDIENTE)
+  username_digita             String?                       @db.VarChar(50)
+  created_at                  DateTime?                     @db.DateTime(0)
+  username_modifica           String?                       @db.VarChar(50)
+  updated_at                  DateTime?                     @db.Timestamp(0)
+  acabados                    acabados                      @relation(fields: [id_base], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "presentations_ibfk_1")
+  product_presentation_images product_presentation_images[]
+  resultados                  resultados[]
+  sale_details                sale_details[]
+  temp_details                temp_details[]
+  terminados                  terminados[]
+
+  @@index([id_base], map: "fk_base_presentation")
+}
+
+model product_acabados {
+  id                Int                     @id @default(autoincrement())
+  id_producto       Int
+  id_acabado        Int
+  val1              Int                     @default(0)
+  val2              Int                     @default(0)
+  val3              Int                     @default(0)
+  estado            product_acabados_estado @default(VIGENTE)
+  username_digita   String?                 @db.VarChar(100)
+  created_at        DateTime?               @db.DateTime(0)
+  username_modifica String?                 @db.VarChar(100)
+  updated_at        DateTime?               @db.Timestamp(0)
+  ajuste            Decimal?                @db.Decimal(6, 1)
+  products          products                @relation(fields: [id_producto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_acabados_ibfk_1")
+  acabados          acabados                @relation(fields: [id_acabado], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_acabados_ibfk_2")
+
+  @@index([id_acabado], map: "fk_aca")
+  @@index([id_producto], map: "fk_pro")
+}
+
+model product_acabados_copy {
+  id                Int                          @id @default(autoincrement())
+  id_producto       Int
+  id_acabado        Int
+  val1              Int                          @default(0)
+  val2              Int                          @default(0)
+  val3              Int                          @default(0)
+  estado            product_acabados_copy_estado @default(VIGENTE)
+  username_digita   String?                      @db.VarChar(80)
+  created_at        DateTime?                    @db.DateTime(0)
+  username_modifica String?                      @db.VarChar(80)
+  updated_at        DateTime?                    @db.Timestamp(0)
+  ajuste            Int?
+
+  @@index([id_acabado], map: "fk_aca")
+  @@index([id_producto], map: "fk_pro")
+}
+
+model product_presentation_images {
+  id                Int                                @id @default(autoincrement())
+  id_producto       Int
+  id_presentacion   Int
+  imagen            String?                            @db.VarChar(255)
+  orden             Int?
+  estado            product_presentation_images_estado @default(ACTIVO)
+  created_at        DateTime?                          @default(now()) @db.Timestamp(0)
+  username_digita   String?                            @db.VarChar(50)
+  username_modifica String?                            @db.VarChar(50)
+  updated_at        DateTime?                          @db.DateTime(0)
+  products          products                           @relation(fields: [id_producto], references: [id], onDelete: Cascade, map: "product_presentation_images_ibfk_1")
+  presentations     presentations                      @relation(fields: [id_presentacion], references: [id], onDelete: Cascade, map: "product_presentation_images_ibfk_2")
+
+  @@index([id_presentacion], map: "id_presentacion")
+  @@index([id_producto], map: "id_producto")
+}
+
+model production_details {
+  id                 BigInt                    @id @default(autoincrement())
+  resultado_id       BigInt
+  molde_id           Int
+  c_programado       Int
+  c_reales           Int?                      @default(0)
+  existencia         Int?                      @default(0)
+  u_generada         Int?                      @default(0)
+  u_esperadas        Int?                      @default(0)
+  u_procesadas       Int?                      @default(0)
+  pnc                Int?                      @default(0)
+  estado             production_details_estado @default(INICIADO)
+  username_digita    String?                   @db.VarChar(40)
+  created_at         DateTime?                 @db.DateTime(0)
+  username_modifica  String?                   @db.VarChar(40)
+  fecha_finaliza     DateTime?                 @db.DateTime(0)
+  updated_at         DateTime?                 @db.DateTime(0)
+  f_direccionamiento DateTime?                 @db.DateTime(0)
+
+  @@index([resultado_id], map: "FK_RESULTADO")
+  @@index([molde_id], map: "fk_molde")
+}
+
+model products {
+  id                          Int                           @id @default(autoincrement())
+  token                       String?                       @db.VarChar(45)
+  nombre                      String                        @db.VarChar(100)
+  slug                        String?                       @db.Text
+  category_id                 Int?                          @default(7)
+  descripcion                 String?                       @db.VarChar(100)
+  info_adicional              String?                       @db.VarChar(50)
+  insumo_id                   Int?
+  peso                        Decimal                       @default(0.0) @db.Decimal(11, 1)
+  linea_id                    Int?                          @default(1)
+  clasifica_colletions_id     BigInt?
+  is_web                      products_is_web               @default(NO)
+  cotizacion_refs             BigInt?
+  piezas                      Int                           @default(0)
+  image                       String?                       @db.VarChar(80)
+  image1                      String?                       @db.VarChar(80)
+  image2                      String?                       @db.VarChar(80)
+  image3                      String?                       @db.VarChar(80)
+  tipo_cliente                Int                           @default(1)
+  lineacom                    Int?                          @default(1)
+  estado                      products_estado?              @default(ACTIVO)
+  proceso                     products_proceso              @default(CREADO)
+  username_digita             String?                       @db.VarChar(30)
+  created_at                  DateTime?                     @db.Timestamp(0)
+  username_modifica           String?                       @db.VarChar(30)
+  updated_at                  DateTime?                     @db.Timestamp(0)
+  complementos                complementos[]
+  insumo_detalles             insumo_detalles[]
+  molde_temps                 molde_temps[]
+  moldes                      moldes[]
+  product_acabados            product_acabados[]
+  product_presentation_images product_presentation_images[]
+  clasifica_collections       clasifica_collections?        @relation(fields: [clasifica_colletions_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_collections")
+  categories                  categories?                   @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "products_ibfk_1")
+  canal                       canal?                        @relation(fields: [lineacom], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "products_ibfk_2")
+  resultados                  resultados[]
+  sale_details                sale_details[]
+  temp_details                temp_details[]
+  terminados                  terminados[]
+
+  @@index([category_id], map: "FK_CATEGORIA_PRODUCTO")
+  @@index([lineacom], map: "fk_canal_lineacom")
+  @@index([insumo_id], map: "fk_insumo_producto")
+  @@index([linea_id], map: "fk_lineaid_lineas")
+  @@index([linea_id], map: "fk_lineapro_referencia")
+  @@index([clasifica_colletions_id], map: "product_collections_idx")
+}
+
+model prototipos {
+  id                BigInt            @id @default(autoincrement())
+  observacion       String            @db.VarChar(100)
+  tipo              prototipos_tipo
+  estado            prototipos_estado @default(VIGENTE)
+  created_at        DateTime          @db.DateTime(0)
+  username_digita   String            @db.VarChar(50)
+  solicita          String            @db.VarChar(80)
+  username_modifica String?           @db.VarChar(80)
+  updated_at        DateTime?         @db.DateTime(0)
+}
+
+model providers {
+  id                Int              @id @default(autoincrement())
+  num_documento     String           @db.VarChar(15)
+  nombre            String           @db.VarChar(60)
+  razon_social      String?          @db.VarChar(100)
+  contacto          String?          @db.VarChar(60)
+  telefono          String?          @db.VarChar(12)
+  celular           String?          @db.VarChar(12)
+  email             String?          @db.VarChar(50)
+  direccion         String           @db.VarChar(50)
+  ciudad            String           @db.VarChar(60)
+  estado            providers_estado @default(ACTIVO)
+  username_digita   String?          @db.VarChar(40)
+  created_at        DateTime?        @db.DateTime(0)
+  username_modifica String?          @db.VarChar(40)
+  updated_at        DateTime?        @default(now()) @db.DateTime(0)
+  ingresos          ingresos[]
+}
+
+model resultados {
+  id                BigInt            @id @default(autoincrement())
+  saledetails_id    BigInt            @db.UnsignedBigInt
+  id_sale           BigInt            @db.UnsignedBigInt
+  pedido            String            @db.VarChar(15)
+  nota_pedido       String            @db.VarChar(150)
+  nota              String            @db.VarChar(50)
+  nombre            String            @db.VarChar(80)
+  id_producto       Int
+  cantidad          Int
+  id_acabado        Int
+  proceso           Int
+  f_pedido          DateTime          @db.Date
+  refmoldes         String            @db.VarChar(80)
+  piezas            Int
+  unidades          Int
+  u_generadas       Int?              @default(0)
+  c_pendientes      Int?              @default(0)
+  u_pendientes      Int?              @default(0)
+  id_complemento    Int
+  injerto           Int?              @default(0)
+  tiquete           Int?              @default(0)
+  estado            resultados_estado @default(EN_LOTE)
+  created_at        DateTime?         @default(now()) @db.DateTime(0)
+  username_digita   String?           @db.VarChar(80)
+  username_modifica String?           @db.VarChar(80)
+  updated_at        DateTime?         @default(now()) @db.DateTime(0)
+  user_rechaza      String?           @db.VarChar(80)
+  fecha_rechaza     DateTime?         @db.DateTime(0)
+  detalle_rechaza   String?           @db.VarChar(200)
+  fecha_reprograma  DateTime?         @db.DateTime(0)
+  user_reprograma   String?           @db.VarChar(80)
+  presentations     presentations     @relation(fields: [id_acabado], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "resultados_ibfk_1")
+  products          products          @relation(fields: [id_producto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "resultados_ibfk_2")
+  lineas            lineas            @relation(fields: [proceso], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "resultados_ibfk_3")
+  complementos      complementos      @relation(fields: [id_complemento], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "resultados_ibfk_4")
+  sales             sales             @relation(fields: [id_sale], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "resultados_ibfk_5")
+  sale_details      sale_details      @relation(fields: [saledetails_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "resultados_ibfk_6")
+
+  @@index([id_acabado], map: "fk_acabado")
+  @@index([id_complemento], map: "fk_complemento")
+  @@index([proceso], map: "fk_linea")
+  @@index([id_producto], map: "fk_producto")
+  @@index([id_sale], map: "fk_sale")
+  @@index([saledetails_id], map: "fk_saleDetails")
+}
+
+model role_has_permissions {
+  permission_id BigInt @db.UnsignedBigInt
+  role_id       BigInt @db.UnsignedBigInt
+
+  @@id([permission_id, role_id])
+  @@index([role_id], map: "role_has_permissions_role_id_foreign")
+}
+
+model roles {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name       String    @db.VarChar(255)
+  guard_name String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+
+  @@unique([name, guard_name], map: "roles_name_guard_name_unique")
+}
+
+model sale_details {
+  id              BigInt                 @id @default(autoincrement()) @db.UnsignedBigInt
+  precio          Decimal                @db.Decimal(10, 0)
+  cantidad        Int
+  id_presentation Int
+  id_producto     Int
+  nota            String?                @db.VarChar(150)
+  estado          sale_details_estado    @default(PENDIENTE)
+  sale_id         BigInt                 @db.UnsignedBigInt
+  username_digita String                 @db.VarChar(40)
+  created_at      DateTime?              @db.Timestamp(0)
+  updated_at      DateTime?              @default(now()) @db.Timestamp(0)
+  u_estado        String?                @db.VarChar(40)
+  f_estado        DateTime?              @db.DateTime(0)
+  muestras        sale_details_muestras? @default(NO)
+  valor_molde     Decimal?               @db.Decimal(10, 2)
+  despachado      Int?                   @default(0)
+  detalleRechaza  String?                @db.VarChar(200)
+  info            String?                @db.VarChar(60)
+  existe          sale_details_existe?   @default(NO)
+  resultados      resultados[]
+  sales           sales                  @relation(fields: [sale_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "sale_details_ibfk_2")
+  products        products               @relation(fields: [id_producto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "sale_details_ibfk_3")
+  presentations   presentations          @relation(fields: [id_presentation], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "sale_details_ibfk_4")
+
+  @@index([id_presentation], map: "fk_presentation_saleDetails")
+  @@index([id_producto], map: "fk_producto_sale")
+  @@index([sale_id], map: "sale_details_sale_id_foreign")
+}
+
+model sales {
+  id                BigInt          @id @default(autoincrement()) @db.UnsignedBigInt
+  id_persona        Int
+  observacion       String          @db.VarChar(250)
+  type              Int             @default(1)
+  serial            String?         @db.VarChar(15)
+  comprobante       Int?            @default(0)
+  total             Decimal         @db.Decimal(20, 2)
+  descuento         Decimal         @db.Decimal(10, 0)
+  aplicado          Decimal         @default(0.00) @db.Decimal(5, 2)
+  grantotal         Decimal         @db.Decimal(20, 0)
+  fecha_entrega     DateTime        @db.Date
+  estado            sales_estado    @default(PENDIENTE)
+  detalle           String?         @db.VarChar(120)
+  f_auto            DateTime?       @db.DateTime(0)
+  u_auto            String?         @db.VarChar(40)
+  f_recha           DateTime?       @db.DateTime(0)
+  u_recha           String?         @db.VarChar(40)
+  formapago         sales_formapago @default(CONTADO)
+  PagoAprobado      String?         @db.VarChar(11)
+  cantMinima        String?         @db.VarChar(4)
+  ApruebaCant       String?         @db.VarChar(4)
+  umin_aprueba      String?         @db.VarChar(40)
+  umin_fecha        DateTime?       @db.DateTime(0)
+  cu_pago           String?         @db.VarChar(40)
+  cf_pago           DateTime?       @db.DateTime(0)
+  temp              String?         @db.VarChar(4)
+  ApruebaTemp       String?         @db.VarChar(4)
+  tu_aprueba        String?         @db.VarChar(40)
+  tf_aprueba        DateTime?       @db.DateTime(0)
+  num_cierre        Int?            @default(0)
+  user_cierre       String?         @db.VarChar(80)
+  fecha_cierre      DateTime?       @db.DateTime(0)
+  user_id           BigInt          @db.UnsignedBigInt
+  created_at        DateTime?       @db.Timestamp(0)
+  updated_at        DateTime?       @db.Timestamp(0)
+  username_modifica String?         @db.VarChar(80)
+  username_digita   String?         @db.VarChar(40)
+  resultados        resultados[]
+  sale_details      sale_details[]
+  personas          personas        @relation(fields: [id_persona], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "sales_ibfk_1")
+  users             users           @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "sales_ibfk_2")
+
+  @@index([id_persona], map: "fk_persona")
+  @@index([user_id], map: "sales_user_id_foreign")
+}
+
+model salida_detalles {
+  id                Int                     @id @default(autoincrement())
+  id_salida         Int
+  id_insumos        Int
+  cantidad          Decimal                 @db.Decimal(15, 2)
+  costo             Int?                    @default(0)
+  tipo_mov          Int?                    @default(2)
+  username_digita   String?                 @db.VarChar(40)
+  created_at        DateTime?               @db.DateTime(0)
+  username_modifica String?                 @db.VarChar(40)
+  updated_at        DateTime                @default(now()) @db.DateTime(0)
+  fecha_cierre      DateTime?               @db.DateTime(0)
+  username_cierre   String?                 @db.VarChar(50)
+  cierre            salida_detalles_cierre? @default(NO)
+  salidas           salidas                 @relation(fields: [id_salida], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "salida_detalles_ibfk_1")
+  misinsumos        misinsumos              @relation(fields: [id_insumos], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "salida_detalles_ibfk_2")
+
+  @@index([id_insumos], map: "fk_misinsumos")
+  @@index([id_salida], map: "fk_salida")
+}
+
+model salidas {
+  id                Int               @id @default(autoincrement())
+  area              Int
+  contacto          String            @db.VarChar(60)
+  comprobante       String            @db.VarChar(12)
+  orden             Int?
+  observacion       String            @db.VarChar(90)
+  estado            salidas_estado    @default(VIGENTE)
+  username_digita   String?           @db.VarChar(40)
+  created_at        DateTime?         @db.DateTime(0)
+  username_modifica String?           @db.VarChar(40)
+  updated_at        DateTime          @default(now()) @db.DateTime(0)
+  salida_detalles   salida_detalles[]
+  areas             areas             @relation(fields: [area], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "salidas_ibfk_1")
+
+  @@index([area], map: "FK_AREA_SALIDA")
+}
+
+model temp_details {
+  id                BigInt                @id @default(autoincrement()) @db.UnsignedBigInt
+  precio            Decimal               @db.Decimal(10, 0)
+  cantidad          Int
+  id_presentation   Int
+  id_producto       Int
+  nota              String?               @db.VarChar(60)
+  estado            temp_details_estado   @default(AUTORIZADO)
+  temp_id           BigInt                @db.UnsignedBigInt
+  username_digita   String                @db.VarChar(40)
+  created_at        DateTime?             @db.Timestamp(0)
+  updated_at        DateTime?             @default(now()) @db.Timestamp(0)
+  username_modifica String?               @db.VarChar(80)
+  u_estado          String?               @db.VarChar(40)
+  f_estado          DateTime?             @db.DateTime(0)
+  despachado        Int?                  @default(0)
+  muestras          temp_details_muestras
+  valor_molde       Decimal?              @db.Decimal(10, 2)
+  detalleRechaza    String?               @db.VarChar(120)
+  temps             temps                 @relation(fields: [temp_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "temp_details_ibfk_1")
+  products          products              @relation(fields: [id_producto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "temp_details_ibfk_2")
+  presentations     presentations         @relation(fields: [id_presentation], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "temp_details_ibfk_3")
+
+  @@index([id_presentation], map: "fk_presentation_saleDetails")
+  @@index([id_producto], map: "fk_producto_sale")
+  @@index([temp_id], map: "temp_id_foreign")
+}
+
+model temps {
+  id                BigInt          @id @default(autoincrement()) @db.UnsignedBigInt
+  id_persona        Int
+  observacion       String          @db.VarChar(250)
+  type              Int             @default(1)
+  serial            String?         @db.VarChar(15)
+  comprobante       Int?            @default(0)
+  total             Decimal         @db.Decimal(20, 2)
+  descuento         Decimal         @db.Decimal(10, 0)
+  aplicado          Decimal         @default(0.00) @db.Decimal(5, 2)
+  grantotal         Decimal         @db.Decimal(20, 0)
+  fecha_entrega     DateTime        @db.Date
+  estado            temps_estado    @default(AUTORIZADO)
+  detalle           String?         @db.VarChar(120)
+  f_auto            DateTime?       @db.DateTime(0)
+  u_auto            String?         @db.VarChar(40)
+  f_recha           DateTime?       @db.DateTime(0)
+  u_recha           String?         @db.VarChar(40)
+  formapago         temps_formapago @default(CONTADO)
+  PagoAprobado      String?         @db.VarChar(11)
+  cantMinima        String?         @db.VarChar(4)
+  ApruebaCant       String?         @db.VarChar(4)
+  umin_aprueba      String?         @db.VarChar(40)
+  umin_fecha        DateTime?       @db.DateTime(0)
+  cu_pago           String?         @db.VarChar(40)
+  cf_pago           DateTime?       @db.DateTime(0)
+  temp              String?         @db.VarChar(4)
+  ApruebaTemp       String?         @db.VarChar(4)
+  tu_aprueba        String?         @db.VarChar(40)
+  tf_aprueba        DateTime?       @db.DateTime(0)
+  num_cierre        Int?            @default(0)
+  user_cierre       String?         @db.VarChar(80)
+  fecha_cierre      DateTime?       @db.DateTime(0)
+  user_id           BigInt          @db.UnsignedBigInt
+  created_at        DateTime?       @db.Timestamp(0)
+  updated_at        DateTime?       @db.Timestamp(0)
+  username_modifica String?         @db.VarChar(80)
+  username_digita   String?         @db.VarChar(40)
+  temp_details      temp_details[]
+  personas          personas        @relation(fields: [id_persona], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "temps_ibfk_1")
+  users             users           @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "temps_ibfk_2")
+
+  @@index([id_persona], map: "persona_temp")
+  @@index([user_id], map: "user_id_foreign")
+}
+
+model terminado_detalles {
+  id                Int       @id @default(autoincrement())
+  id_terminado      Int
+  cantidad          Int
+  observacion       String    @db.VarChar(150)
+  username_digita   String?   @db.VarChar(80)
+  created_at        DateTime? @db.DateTime(0)
+  username_modifica String?   @db.VarChar(80)
+  updated_at        DateTime? @db.DateTime(0)
+
+  @@index([id_terminado], map: "fk_terminado")
+}
+
+model terminados {
+  id                Int               @id @default(autoincrement())
+  id_producto       Int
+  id_presentation   Int
+  stock             Int
+  estado            terminados_estado @default(DISPONIBLE)
+  adicional         String            @db.VarChar(50)
+  separado          String?           @db.VarChar(200)
+  salida            String?           @db.VarChar(100)
+  username_digita   String?           @db.VarChar(40)
+  created_at        DateTime?         @db.DateTime(0)
+  username_modifica String?           @db.VarChar(40)
+  updated_at        DateTime?         @default(now()) @db.DateTime(0)
+  presentations     presentations     @relation(fields: [id_presentation], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "terminados_ibfk_1")
+  products          products          @relation(fields: [id_producto], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "terminados_ibfk_2")
+
+  @@index([id_presentation], map: "fk_presentation")
+  @@index([id_producto], map: "fk_producto")
+}
+
+model users {
+  id                                    BigInt       @id @default(autoincrement()) @db.UnsignedBigInt
+  name                                  String       @db.VarChar(40)
+  telefono                              String       @db.VarChar(15)
+  email                                 String       @unique(map: "users_email_unique") @db.VarChar(100)
+  profile                               String       @db.VarChar(50)
+  status                                users_status @default(ACTIVE)
+  email_verified_at                     DateTime?    @db.Timestamp(0)
+  password                              String       @db.VarChar(80)
+  image                                 String?      @db.VarChar(60)
+  notification                          Int?         @default(0)
+  remember_token                        String?      @db.VarChar(100)
+  created_at                            DateTime?    @db.Timestamp(0)
+  updated_at                            DateTime?    @db.Timestamp(0)
+  messages_messages_to_user_idTousers   messages[]   @relation("messages_to_user_idTousers")
+  messages_messages_from_user_idTousers messages[]   @relation("messages_from_user_idTousers")
+  sales                                 sales[]
+  temps                                 temps[]
+}
+
+model zonas {
+  id     Int    @id @default(autoincrement())
+  nombre String @db.VarChar(25)
+  tipo   String @db.VarChar(5)
+}
+
+enum cotiza_moldes_diametro {
+  DIAMETRO_23 @map("23")
+  DIAMETRO_26 @map("26")
+  DIAMETRO_28 @map("28")
+  DIAMETRO_30 @map("30")
+  DIAMETRO_33 @map("33")
+  DIAMETRO_36 @map("36")
+}
+
+enum despachos_estado {
+  DESPACHADO
+  CANCELADO
+}
+
+enum misinsumos_tipo {
+  INDIRECTO
+  MATERIA_PRIMA  @map("MATERIA PRIMA")
+  REPUESTOS
+  SUMINISTROS
+  SERVICIOS
+  PAPELERIA
+  HERRAMIENTA
+  ASEO
+  DOTACION___EPP @map("DOTACION - EPP")
+}
+
+enum despachotemps_estado {
+  DESPACHADO
+  CANCELADO
+}
+
+enum listas_estado {
+  GENERADA
+  ANULADA
+}
+
+enum prototipos_tipo {
+  ARMADO
+  CHALLENGER
+}
+
+enum linea_ventas_estado {
+  DESHABILITADO
+  VIGENTE
+}
+
+enum cotiza_lineas_estado {
+  VIGENTE
+  DE_BAJA @map("DE BAJA")
+}
+
+enum cotiza_ggfs_estado {
+  VIGENTE
+  DE_BAJA @map("DE BAJA")
+}
+
+enum misinsumos_area {
+  ALMACEN
+  DESPACHOS
+  FUNDICION
+  GALVANICA
+  MANULEGGI
+  MOLDES
+  MONTAJE
+  PULIDO
+  TERMINADO
+  TROQUELERIA
+}
+
+enum areas_estado {
+  ACTIVO
+  DESHABILITADO
+}
+
+enum acabados_estado {
+  ACTIVO
+  PRIVADA
+  DESHABLITADO
+  FORMULA2
+}
+
+enum presentations_estado {
+  ACTIVO
+  DESHABILITADO
+}
+
+enum categoria_ventas_estado {
+  VIGENTE
+  DESHABIILITADO
+}
+
+enum prototipos_estado {
+  VIGENTE
+  DE_BAJA @map("DE BAJA")
+}
+
+enum terminados_estado {
+  DISPONIBLE
+  DE_BAJA    @map("DE BAJA")
+  REUBICADO
+  SEPARADO
+}
+
+enum clasifica_collections_estado {
+  VIGENTE
+  DESHABILITADO
+}
+
+enum users_status {
+  ACTIVE
+  LOCKED
+}
+
+enum formula_rangos_estado {
+  VIGENTE
+  DE_BAJA @map("DE BAJA")
+}
+
+enum movimientos_estado {
+  INGRESADA
+  FINALIZADO
+  ARMADO
+  FRACCIONADO_D
+  FRACCIONADO
+  ALMACEN
+  DESPACHADO
+  DESPACHADO_D
+  DADO_DE_BAJA  @map("DADO DE BAJA")
+  INEXISTENTE
+  RECHAZADO
+}
+
+enum product_presentation_images_estado {
+  ACTIVO
+  DESHABILITADO
+}
+
+enum ingresos_tipo_comprobante {
+  FACTURA
+  REMISION
+}
+
+enum formula2_estado {
+  VIGENTE
+  DE_BAJA @map("DE BAJA")
+}
+
+enum product_acabados_copy_estado {
+  VIGENTE
+  DE_BAJA @map("DE BAJA")
+}
+
+enum cotizacion_refs_estado {
+  CREADA
+  APROBADA
+  RECHAZADA
+  ASIGNADA
+}
+
+enum misinsumos_rotacion {
+  ALTA
+  MEDIA
+  BAJA
+}
+
+enum cotiza_moldes_estado {
+  VIGENTE
+  DE_BAJA @map("DE BAJA")
+}
+
+enum temp_details_estado {
+  PENDIENTE
+  AUTORIZADO
+  RECHAZADO
+  PRODUCCION
+  TERMINADO
+  DESPACHADO
+  DESPACHADO_D
+}
+
+enum sale_details_estado {
+  PENDIENTE
+  AUTORIZADO
+  RECHAZADO
+  PRODUCCION
+  TERMINADO
+  DESPACHADO
+  EN_LOTE           @map("EN LOTE")
+  CICLOS_TERMINADOS @map("CICLOS TERMINADOS")
+  ARMADO
+  DESPACHADO_D
+  FINALIZADO
+}
+
+enum product_acabados_estado {
+  VIGENTE
+  DE_BAJA @map("DE BAJA")
+}
+
+enum salidas_estado {
+  DE_BAJA @map("DE BAJA")
+  VIGENTE
+}
+
+enum insumo_detalles_estado {
+  VIGENTE
+  DE_BAJA @map("DE BAJA")
+}
+
+enum presentations_data {
+  BASE
+  DEPENDIENTE
+  FORMULA2
+}
+
+enum ingresos_estado {
+  DE_BAJA @map("DE BAJA")
+  VIGENTE
+}
+
+enum messages_estado {
+  ACTIVA
+  ANULADA
+}
+
+enum despacho_details_estado {
+  DESPACHADO
+  DEVUELTO
+  RECHAZADO
+}
+
+enum despachotemp_details_estado {
+  DESPACHADO
+  DEVUELTO
+  RECHAZADO
+}
+
+enum categories_estado {
+  ACTIVO
+  ELIMINADO
+}
+
+enum complementos_estado {
+  VIGENTE
+  DE_BAJA @map("DE BAJA")
+}
+
+enum products_is_web {
+  SI
+  NO
+}
+
+enum armados_estado {
+  ARMADO
+  DESPACHADO
+  FINALIZADO
+  INGRESADA
+  FRACCIONADO_D
+  ALMACEN
+  TERMINADO
+  SERVICIO
+  INEXISTENTE
+  RECHAZADO
+}
+
+enum misinsumos_estado {
+  ACTIVO
+  DESHABILITADO
+}
+
+enum providers_estado {
+  ACTIVO
+  DESHABILITADO
+  BLOQUEADO
+}
+
+enum production_details_estado {
+  INICIADO
+  FINALIZADO
+  RECHAZADO
+  DIRECCIONADO
+  ARMADO
+  DESPACHADO
+  INTERRUMPIDO
+  DESPACHADO_D
+}
+
+enum temps_estado {
+  PENDIENTE
+  AUTORIZADO
+  RECHAZADO
+  PRODUCCION
+  TERMINADO
+  DESPACHADO
+  EN_LOTE    @map("EN LOTE")
+  ANTICIPADO
+}
+
+enum sales_estado {
+  PENDIENTE
+  AUTORIZADO
+  RECHAZADO
+  PRODUCCION
+  TERMINADO
+  DESPACHADO
+  EN_LOTE    @map("EN LOTE")
+  ANTICIPADO
+}
+
+enum moldes_estado {
+  VIGENTE
+  DE_BAJA @map("DE BAJA")
+}
+
+enum ingreso_detalles_cierre {
+  SI
+  NO
+}
+
+enum molde_temps_estado {
+  VIGENTE
+  DE_BAJA @map("DE BAJA")
+}
+
+enum salida_detalles_cierre {
+  SI
+  NO
+}
+
+enum moldes_tipo {
+  ARMADO
+  CHALLENGER
+}
+
+enum sale_details_muestras {
+  SI
+  NO
+  SERVICIO
+  Inv__Existente @map("Inv. Existente")
+}
+
+enum cotiza_mosals_estado {
+  VIGENTE
+  DE_BAJA @map("DE BAJA")
+}
+
+enum molde_temps_tipo {
+  ARMADO
+  CHALLENGER
+}
+
+enum moldes_disponible {
+  SI
+  NO
+}
+
+enum molde_temps_disponible {
+  SI
+  NO
+}
+
+enum temp_details_muestras {
+  SI
+  NO
+  SERVICIO
+  EMPTY_ENUM_VALUE @map("")
+}
+
+enum personas_cliente_top {
+  SI
+  NO
+}
+
+enum personasss_tipo {
+  FABRICANTE
+  DISTRIBUIDOR
+  GRUPO
+  OTRO
+}
+
+enum personas_tipo {
+  FABRICANTE
+  DISTRIBUIDOR
+  GRUPO
+  OTRO
+}
+
+enum temps_formapago {
+  CONTADO
+  CREDITO
+  ANTICIPADO
+}
+
+enum sales_formapago {
+  CONTADO
+  CREDITO
+  ANTICIPADO
+  REPOSICION
+}
+
+enum sale_details_existe {
+  SI
+  NO
+}
+
+enum personas_tipo_venta {
+  NACIONAL
+  INTERNACIONAL
+}
+
+enum products_estado {
+  ACTIVO
+  DESHABILITADO
+}
+
+enum products_proceso {
+  CREADO
+  COMPLETO
+}
+
+enum resultados_estado {
+  PRODUCCION
+  TERMINADO
+  RECHAZADO
+  EN_LOTE      @map("EN LOTE")
+  C_TERMINADOS @map("C.TERMINADOS")
+  ARMADO
+  ARMADO_D
+  DESPACHADO
+  DESPACHADO_D
+}
+
+enum personasss_vigente {
+  SI
+  NO
+}
+
+enum personas_vigente {
+  SI
+  NO
+}
+
+enum cotizacions_estado {
+  CREADA
+  APROBADA
+  RECHAZADA
+  ASIGNADA
+}
+
+enum personasss_dias_credito {
+  DIAMETRO_0  @map("0")
+  DIAMETRO_30 @map("30")
+  DIAMETRO_60 @map("60")
+  DIAMETRO_90 @map("90")
+  DIAMETRO_45 @map("45")
+}
+
+enum personas_dias_credito {
+  DIAMETRO_0  @map("0")
+  DIAMETRO_30 @map("30")
+  DIAMETRO_60 @map("60")
+  DIAMETRO_90 @map("90")
+  DIAMETRO_45 @map("45")
+}
