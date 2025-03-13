@@ -151,7 +151,6 @@ export class ProductsService {
         }),
       };
 
-      console.log(productWithCalculatedValues);
 
 
 
