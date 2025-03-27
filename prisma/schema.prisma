@@ -58,6 +58,7 @@ model armados {
 model canal {
   id       Int        @id @default(autoincrement())
   nombre   String     @db.VarChar(30)
+  slug     String?    @db.VarChar(60)
   products products[]
 }
 
@@ -73,6 +74,7 @@ model categoria_ventas {
 model categories {
   id                Int               @id @default(autoincrement())
   nombre            String            @db.VarChar(80)
+  slug              String?           @db.VarChar(200)
   alias             String            @db.VarChar(10)
   lista             String?           @db.VarChar(40)
   created_at        DateTime?         @db.Timestamp(0)
@@ -86,6 +88,7 @@ model categories {
 model clasifica_collections {
   id                BigInt                       @id @default(autoincrement())
   nombre            String                       @db.VarChar(200)
+  slug              String                       @unique(map: "slug_UNIQUE") @db.VarChar(200)
   descripcion       String                       @db.VarChar(100)
   alias             String                       @db.VarChar(20)
   estado            clasifica_collections_estado @default(VIGENTE)
@@ -510,6 +513,7 @@ model insumo_detalles {
 model insumos {
   id                Int      @id @default(autoincrement())
   nombre            String   @db.VarChar(50)
+  slug              String?  @db.VarChar(50)
   username_digita   String?  @db.VarChar(40)
   created_at        DateTime @default(now()) @db.Timestamp(0)
   username_modifica String?  @db.VarChar(40)
@@ -552,6 +556,7 @@ model linea_ventas {
 model lineas {
   id                Int          @id @default(autoincrement())
   nombre            String       @db.VarChar(50)
+  slug              String?      @db.VarChar(100)
   alias             String       @db.VarChar(6)
   tipo              String       @default("P") @db.VarChar(2)
   username_digita   String       @db.VarChar(40)
@@ -889,7 +894,7 @@ model personas {
   departamento               String?               @db.VarChar(30)
   cupo                       Int?                  @default(0)
   observacion                String?               @db.VarChar(150)
-  dias_credito               personas_dias_credito @default(DIAMETRO_0)
+  dias_credito               personas_dias_credito @default(DIAS_0)
   estado                     String?               @default("DESHABILITADO") @db.VarChar(15)
   vigente                    personas_vigente      @default(SI)
   updated_at                 DateTime?             @db.Timestamp(0)
@@ -928,7 +933,7 @@ model personasss {
   departamento      String?                 @db.VarChar(30)
   cupo              Int?                    @default(0)
   observacion       String?                 @db.VarChar(150)
-  dias_credito      personasss_dias_credito @default(DIAMETRO_0)
+  dias_credito      personasss_dias_credito @default(DIAS_0)
   estado            String?                 @default("DESHABILITADO") @db.VarChar(15)
   vigente           personasss_vigente      @default(SI)
   updated_at        DateTime?               @db.Timestamp(0)
@@ -941,6 +946,8 @@ model presentations {
   id                          Int                           @id @default(autoincrement())
   alias                       String                        @db.VarChar(20)
   nombre                      String?                       @db.VarChar(50)
+  slug                        String?                       @db.VarChar(100)
+  is_web                      presentations_is_web?         @default(NO)
   estado                      presentations_estado?         @default(ACTIVO)
   id_base                     Int
   hexa                        String?                       @db.VarChar(15)
@@ -952,6 +959,7 @@ model presentations {
   updated_at                  DateTime?                     @db.Timestamp(0)
   acabados                    acabados                      @relation(fields: [id_base], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "presentations_ibfk_1")
   product_presentation_images product_presentation_images[]
+  products                    products[]
   resultados                  resultados[]
   sale_details                sale_details[]
   temp_details                temp_details[]
@@ -1045,13 +1053,17 @@ model products {
   nombre                      String                        @db.VarChar(100)
   slug                        String?                       @db.Text
   category_id                 Int?                          @default(7)
-  descripcion                 String?                       @db.VarChar(100)
+  descripcion                 String?                       @db.Text
   info_adicional              String?                       @db.VarChar(50)
   insumo_id                   Int?
   peso                        Decimal                       @default(0.0) @db.Decimal(11, 1)
+  ancho                       Decimal?                      @default(0.0) @db.Decimal(11, 1)
+  alto                        Decimal?                      @default(0.0) @db.Decimal(11, 1)
+  grosor                      Decimal?                      @default(0.0) @db.Decimal(11, 1)
   linea_id                    Int?                          @default(1)
   clasifica_colletions_id     BigInt?
   is_web                      products_is_web               @default(NO)
+  id_presentacion_web         Int?
   cotizacion_refs             BigInt?
   piezas                      Int                           @default(0)
   image                       String?                       @db.VarChar(80)
@@ -1073,6 +1085,7 @@ model products {
   product_acabados            product_acabados[]
   product_presentation_images product_presentation_images[]
   clasifica_collections       clasifica_collections?        @relation(fields: [clasifica_colletions_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_collections")
+  presentations               presentations?                @relation(fields: [id_presentacion_web], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_presentation")
   categories                  categories?                   @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "products_ibfk_1")
   canal                       canal?                        @relation(fields: [lineacom], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "products_ibfk_2")
   resultados                  resultados[]
@@ -1086,6 +1099,7 @@ model products {
   @@index([linea_id], map: "fk_lineaid_lineas")
   @@index([linea_id], map: "fk_lineapro_referencia")
   @@index([clasifica_colletions_id], map: "product_collections_idx")
+  @@index([id_presentacion_web], map: "product_presentation_idx")
 }
 
 model prototipos {
@@ -1536,11 +1550,6 @@ enum terminados_estado {
   SEPARADO
 }
 
-enum clasifica_collections_estado {
-  VIGENTE
-  DESHABILITADO
-}
-
 enum users_status {
   ACTIVE
   LOCKED
@@ -1549,6 +1558,11 @@ enum users_status {
 enum formula_rangos_estado {
   VIGENTE
   DE_BAJA @map("DE BAJA")
+}
+
+enum clasifica_collections_estado {
+  VIGENTE
+  DESHABILITADO
 }
 
 enum movimientos_estado {
@@ -1680,11 +1694,6 @@ enum complementos_estado {
   DE_BAJA @map("DE BAJA")
 }
 
-enum products_is_web {
-  SI
-  NO
-}
-
 enum armados_estado {
   ARMADO
   DESPACHADO
@@ -1789,6 +1798,11 @@ enum moldes_disponible {
   NO
 }
 
+enum products_is_web {
+  SI
+  NO
+}
+
 enum molde_temps_disponible {
   SI
   NO
@@ -1843,16 +1857,6 @@ enum personas_tipo_venta {
   INTERNACIONAL
 }
 
-enum products_estado {
-  ACTIVO
-  DESHABILITADO
-}
-
-enum products_proceso {
-  CREADO
-  COMPLETO
-}
-
 enum resultados_estado {
   PRODUCCION
   TERMINADO
@@ -1865,9 +1869,35 @@ enum resultados_estado {
   DESPACHADO_D
 }
 
+enum products_estado {
+  ACTIVO
+  DESHABILITADO
+}
+
+enum personasss_dias_credito {
+  DIAS_0  @map("0")
+  DIAS_30 @map("30")
+  DIAS_60 @map("60")
+  DIAS_90 @map("90")
+  DIAS_45 @map("45")
+}
+
+enum products_proceso {
+  CREADO
+  COMPLETO
+}
+
 enum personasss_vigente {
   SI
   NO
+}
+
+enum personas_dias_credito {
+  DIAS_0  @map("0")
+  DIAS_30 @map("30")
+  DIAS_60 @map("60")
+  DIAS_90 @map("90")
+  DIAS_45 @map("45")
 }
 
 enum personas_vigente {
@@ -1882,18 +1912,7 @@ enum cotizacions_estado {
   ASIGNADA
 }
 
-enum personasss_dias_credito {
-  DIAMETRO_0  @map("0")
-  DIAMETRO_30 @map("30")
-  DIAMETRO_60 @map("60")
-  DIAMETRO_90 @map("90")
-  DIAMETRO_45 @map("45")
-}
-
-enum personas_dias_credito {
-  DIAMETRO_0  @map("0")
-  DIAMETRO_30 @map("30")
-  DIAMETRO_60 @map("60")
-  DIAMETRO_90 @map("90")
-  DIAMETRO_45 @map("45")
+enum presentations_is_web {
+  SI
+  NO
 }

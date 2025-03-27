@@ -27,11 +27,30 @@ export class ProductsController {
     }
   }
 
-  @Get(':token')
-  findOne(@Param('token') token: string) {
-    return this.productsService.findOne(token);
+  @Get('/related')
+  async findRelated() {
+    try {
+      const products = await this.productsService.findRelated();
+      return {
+        status: 'success',
+        count: products.length,
+        data: products,
+        related: 'ok'
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Failed to fetch products',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
-
+  @Get(':token')
+  findOne(@Param('token') token: string) {
+    return this.productsService.findOneByToken(token);
+  }
 
 }
