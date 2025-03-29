@@ -1,9 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger  } from '@nestjs/common';
+
 import { PrismaService } from '../prisma/prisma.service';
 
 
 @Injectable()
 export class ProductsService {
+
+  private readonly logger = new Logger(ProductsService.name);
 
   constructor(private prisma: PrismaService) { }
 
@@ -176,7 +179,6 @@ export class ProductsService {
       }
     }
   
-
     async findRelated() {
       try {
         const products = await this.prisma.products.findMany({
@@ -292,6 +294,90 @@ export class ProductsService {
       } catch (error) {
         console.error('Error fetching products:', error);
         throw new Error('Failed to fetch products');
+      }
+    }
+
+    async getDiscountedProducts() {
+      try {
+        // 1. Obtener ofertas activas con relaciones necesarias
+        const activeOffers = await this.prisma.producto_presentacion_ofertas.findMany({
+          where: { estado: 'VIGENTE' },
+          include: {
+            products: {
+              select: {
+                token: true,
+                nombre: true,
+                image: true,
+                product_acabados: {
+                  where: {
+                    estado: 'VIGENTE',
+                    val2: { not: 0 }
+                  },
+                  select: {
+                    id_acabado: true,
+                    val2: true
+                  }
+                }
+              }
+            },
+            presentations: {
+              select: {
+                nombre: true,
+                variacion: true,
+                id_base: true
+              }
+            }
+          }
+        });
+    
+        // 2. Obtener precios base
+        const basePrices = await this.prisma.product_acabados.findMany({
+          where: {
+            id_producto: { in: activeOffers.map(o => o.producto_id) },
+            id_acabado: { in: activeOffers.map(o => o.presentations.id_base) }
+          },
+          select: {
+            id_producto: true,
+            id_acabado: true,
+            val2: true
+          }
+        });
+    
+        // 3. Construir respuesta
+        const products = activeOffers.map(offer => {
+          const basePrice = basePrices.find(
+            bp => bp.id_producto === offer.producto_id && 
+                  bp.id_acabado === offer.presentations.id_base
+          )?.val2 || 0;
+    
+          const variacion = offer.presentations.variacion || 0;
+          const valorConVariacion = Math.round(basePrice * (1 + variacion / 100));
+          const valorConDescuento = Math.round(valorConVariacion * (1 - offer.porcentaje.toNumber() / 100));
+    
+          return {
+            token: offer.products.token,
+            nombre: offer.products.nombre,
+            image: offer.products.image,
+            valor: valorConDescuento,
+            presentacion: offer.presentations.nombre,
+            cantidad_presentaciones: 0, // Campo añadido
+            oferta: true
+          };
+        }).filter(p => p.valor > 0);
+    
+        return {
+          status: 'success',
+          count: products.length,
+          data: { products }
+        };
+    
+      } catch (error) {
+        this.logger.error(`Error obteniendo productos con descuento: ${error.message}`);
+        return {
+          status: 'error',
+          count: 0,
+          data: { products: [] }
+        };
       }
     }
   

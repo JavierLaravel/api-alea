@@ -48,6 +48,11 @@ export class ProductsController {
     }
   }
 
+  @Get('/offers')
+  async getProductosEnOferta() {
+    return this.productsService.getDiscountedProducts();
+  }
+
   @Get(':token')
   findOne(@Param('token') token: string) {
     return this.productsService.findOneByToken(token);
