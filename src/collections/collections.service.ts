@@ -1,8 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger  } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class CollectionsService {
+
+  private readonly logger = new Logger(CollectionsService.name);
+
 
   constructor(private prisma: PrismaService) { }
 
@@ -47,6 +50,7 @@ export class CollectionsService {
               is_web: 'SI',
               estado: 'ACTIVO',
               proceso: 'COMPLETO',
+              id_presentacion_web: { not: null }
             },
             select: {
               id: true,
@@ -54,92 +58,104 @@ export class CollectionsService {
               nombre: true,
               image: true,
               id_presentacion_web: true,
-            },
-          },
-        },
+              product_acabados: {
+                where: {
+                  estado: 'VIGENTE',
+                  val2: { not: 0 }
+                },
+                select: {
+                  id_acabado: true,
+                  val2: true
+                }
+              },
+              producto_presentacion_ofertas: {
+                select: { id: true }
+              }
+            }
+          }
+        }
       });
   
-      const result = await Promise.all(
-        collections.map(async (collection) => {
-          const products = await Promise.all(
-            collection.products.map(async (product) => {
-              let valorFinal = 0;
-              let nombrePresentacion = '';
-              let cantidadPresentaciones = 0;
+      // Obtener todos los IDs de presentaciones únicos
+      const presentationIds = [
+        ...new Set(
+          collections.flatMap(collection => {
+            return collection.products.map(p => p.id_presentacion_web);
+          })
+        )
+      ].filter(Boolean) as number[];
   
-              if (product.id_presentacion_web) {
-                // Buscar datos de la presentación
-                const presentation = await this.prisma.presentations.findUnique({
-                  where: { id: product.id_presentacion_web },
-                  select: { variacion: true, id_base: true, nombre: true },
-                });
+      // Consultas paralelas para datos relacionados
+      const [presentations, validAcabados] = await Promise.all([
+        this.prisma.presentations.findMany({
+          where: {
+            id: { in: presentationIds },
+            estado: 'ACTIVO',
+            is_web: 'SI'
+          },
+          select: {
+            id: true,
+            nombre: true,
+            variacion: true,
+            id_base: true
+          }
+        }),
+        this.prisma.acabados.findMany({
+          where: { estado: 'ACTIVO' },
+          select: { id: true }
+        })
+      ]);
   
-                if (presentation) {
-                  nombrePresentacion = presentation.nombre ?? '';
+      // Crear estructuras para acceso rápido
+      const presentationMap = new Map(presentations.map(p => [p.id, p]));
+      const validAcabadoIds = new Set(validAcabados.map(a => a.id));
   
-                  // Buscar val2 en product_acabados
-                  const acabado = await this.prisma.product_acabados.findFirst({
-                    where: {
-                      id_producto: product.id,
-                      id_acabado: presentation.id_base,
-                      estado: 'VIGENTE',
-                    },
-                    select: { val2: true },
-                  });
+      return collections.map(collection => ({
+        id: collection.id,
+        nombre: collection.nombre,
+        slug: collection.slug,
+        products: collection.products
+          .map(product => {
+            const presentation = presentationMap.get(product.id_presentacion_web!);
+            let valorFinal = 0;
+            let cantidadPresentaciones = 0;
   
-                  if (acabado) {
-                    valorFinal = acabado.val2;
-                    if (presentation.variacion && presentation.variacion !== 0) {
-                      valorFinal = valorFinal * (1 + presentation.variacion / 100);
-                    }
-                    valorFinal = Math.round(valorFinal);
-                  }
-  
-                  // Contar presentaciones activas
-                  const productAcabados = await this.prisma.product_acabados.findMany({
-                    where: {
-                      id_producto: product.id,
-                      estado: 'VIGENTE',
-                    },
-                    select: { id_acabado: true },
-                  });
-  
-                  const idAcabados = productAcabados.map((a) => a.id_acabado);
-  
-                  cantidadPresentaciones = await this.prisma.presentations.count({
-                    where: {
-                      estado: 'ACTIVO',
-                      is_web: 'SI',
-                      id_base: { in: idAcabados },
-                    },
-                  });
+            if (presentation) {
+              // Calcular valor final
+              const acabado = product.product_acabados.find(
+                pa => pa.id_acabado === presentation.id_base
+              );
+              
+              if (acabado?.val2) {
+                valorFinal = acabado.val2;
+                if (presentation.variacion) {
+                  valorFinal *= (1 + presentation.variacion / 100);
                 }
+                valorFinal = Math.round(valorFinal);
               }
   
-              return {
-                token: product.token,
-                nombre: product.nombre,
-                image: product.image,
-                valor: valorFinal,
-                presentacion: nombrePresentacion,
-                cantidad_presentaciones: cantidadPresentaciones,
-              };
-            }),
-          );
+              // Calcular presentaciones válidas
+              cantidadPresentaciones = product.product_acabados
+                .filter(pa => validAcabadoIds.has(pa.id_acabado))
+                .length;
+            }
   
-          return {
-            id: collection.id,
-            nombre: collection.nombre,
-            slug: collection.slug,
-            products,
-          };
-        }),
-      );
-  
-      return result;
+            return {
+              token: product.token,
+              nombre: product.nombre,
+              image: product.image,
+              valor: valorFinal,
+              presentacion: presentation?.nombre || '',
+              cantidad_presentaciones: cantidadPresentaciones -1,
+              oferta: product.producto_presentacion_ofertas.length > 0
+            };
+          })
+          .filter(product => product.valor > 0) // Filtrar productos sin valor
+      }));
+      
     } catch (error) {
-      console.error('Error in findAllWithProductsV2:', error);
-      throw new Error('Failed to fetch collections with enriched product data');
+      this.logger.error(`Error en findAllWithProducts: ${error.message}`);
+      throw new InternalServerErrorException('Error al obtener colecciones');
     }
   }
   
@@ -158,6 +174,7 @@ export class CollectionsService {
               estado: 'ACTIVO',
               proceso: 'COMPLETO',
               is_web: 'SI',
+              id_presentacion_web: { not: null }
             },
             select: {
               id: true,
@@ -165,89 +182,97 @@ export class CollectionsService {
               nombre: true,
               image: true,
               id_presentacion_web: true,
-            },
-          },
-        },
+              product_acabados: {
+                where: {
+                  estado: 'VIGENTE',
+                  val2: { not: 0 }
+                },
+                select: {
+                  id_acabado: true,
+                  val2: true
+                }
+              },
+              producto_presentacion_ofertas: {
+                select: { id: true }
+              }
+            }
+          }
+        }
       });
   
-      const result = await Promise.all(
-        collections.map(async (collection) => {
-          const products = await Promise.all(
-            collection.products.map(async (product) => {
-              let valorFinal = 0;
-              let nombrePresentacion = '';
-              let cantidadPresentaciones = 0;
+      // Obtener todos los IDs de presentaciones necesarios
+      const presentationIds = collections.flatMap(collection =>
+        collection.products.map(p => p.id_presentacion_web)
+      ).filter(Boolean) as number[];
   
-              if (product.id_presentacion_web) {
-                const presentation = await this.prisma.presentations.findUnique({
-                  where: { id: product.id_presentacion_web },
-                  select: { variacion: true, id_base: true, nombre: true },
-                });
-  
-                if (presentation) {
-                  nombrePresentacion = presentation.nombre ?? '';
-  
-                  const acabado = await this.prisma.product_acabados.findFirst({
-                    where: {
-                      id_producto: product.id,
-                      id_acabado: presentation.id_base,
-                      estado: 'VIGENTE',
-                    },
-                    select: { val2: true },
-                  });
-  
-                  if (acabado) {
-                    valorFinal = acabado.val2;
-                    if (presentation.variacion && presentation.variacion !== 0) {
-                      valorFinal = valorFinal * (1 + presentation.variacion / 100);
-                    }
-                    valorFinal = Math.round(valorFinal);
-                  }
-  
-                  const productAcabados = await this.prisma.product_acabados.findMany({
-                    where: {
-                      id_producto: product.id,
-                      estado: 'VIGENTE',
-                    },
-                    select: { id_acabado: true },
-                  });
-  
-                  const idAcabados = productAcabados.map((a) => a.id_acabado);
-  
-                  cantidadPresentaciones = await this.prisma.presentations.count({
-                    where: {
-                      estado: 'ACTIVO',
-                      is_web: 'SI',
-                      id_base: { in: idAcabados },
-                    },
-                  });
-                }
-              }
-  
-              return {
-                token: product.token,
-                nombre: product.nombre,
-                image: product.image,
-                valor: valorFinal,
-                presentacion: nombrePresentacion,
-                cantidad_presentaciones: cantidadPresentaciones -1,
-              };
-            })
-          );
-  
-          return {
-            id: collection.id,
-            nombre: collection.nombre,
-            slug: collection.slug,
-            products,
-          };
+      // Consultas paralelas para datos relacionados
+      const [presentations, validAcabados] = await Promise.all([
+        this.prisma.presentations.findMany({
+          where: {
+            id: { in: presentationIds },
+            estado: 'ACTIVO',
+            is_web: 'SI'
+          },
+          select: {
+            id: true,
+            nombre: true,
+            variacion: true,
+            id_base: true
+          }
+        }),
+        this.prisma.acabados.findMany({
+          where: { estado: 'ACTIVO' },
+          select: { id: true }
         })
-      );
+      ]);
   
-      return result;
+      // Crear estructuras para acceso rápido
+      const presentationMap = new Map(presentations.map(p => [p.id, p]));
+      const validAcabadoIds = new Set(validAcabados.map(a => a.id));
+  
+      return collections.map(collection => ({
+        id: collection.id,
+        nombre: collection.nombre,
+        slug: collection.slug,
+        products: collection.products
+          .map(product => {
+            const presentation = presentationMap.get(product.id_presentacion_web!);
+            let valorFinal = 0;
+  
+            if (presentation) {
+              const acabado = product.product_acabados.find(
+                pa => pa.id_acabado === presentation.id_base
+              );
+              
+              if (acabado?.val2) {
+                valorFinal = acabado.val2;
+                if (presentation.variacion) {
+                  valorFinal *= (1 + presentation.variacion / 100);
+                }
+                valorFinal = Math.round(valorFinal);
+              }
+            }
+  
+            const presentacionesValidas = product.product_acabados
+              .filter(pa => validAcabadoIds.has(pa.id_acabado))
+              .length;
+  
+            return {
+              token: product.token,
+              nombre: product.nombre,
+              image: product.image,
+              valor: valorFinal,
+              presentacion: presentation?.nombre || '',
+              cantidad_presentaciones: presentacionesValidas,
+              oferta: product.producto_presentacion_ofertas.length > 0
+            };
+          })
+          .filter(product => product.valor > 0)
+      }));
+      
     } catch (error) {
-      console.error('Error in findBySlug:', error);
-      throw new Error('Failed to fetch collection with enriched product data');
+      this.logger.error(`Error en findBySlug: ${error.message}`);
+      throw new InternalServerErrorException('Error al obtener colecciones');
     }
   }
   

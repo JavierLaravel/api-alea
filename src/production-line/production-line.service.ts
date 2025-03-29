@@ -1,9 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger  } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 
 @Injectable()
 export class ProductionLineService {
+
+  private readonly logger = new Logger(ProductionLineService.name);
+
 
   constructor(private prisma: PrismaService) { }
 
@@ -42,27 +45,22 @@ export class ProductionLineService {
 
   async findBySlug(slug: string) {
     try {
+      // 1. Obtener línea de producción
       const productionLine = await this.prisma.lineas.findFirst({
-        where: {
-          slug: slug,
-        },
-        select: {
-          id: true,
-          nombre: true,
-          slug: true,
-        },
+        where: { slug },
+        select: { id: true, nombre: true, slug: true }
       });
   
-      if (!productionLine) {
-        return [];
-      }
+      if (!productionLine) return [];
   
+      // 2. Obtener productos con relaciones necesarias
       const productos = await this.prisma.products.findMany({
         where: {
           linea_id: productionLine.id,
           estado: 'ACTIVO',
           proceso: 'COMPLETO',
           is_web: 'SI',
+          id_presentacion_web: { not: null }
         },
         select: {
           id: true,
@@ -70,83 +68,105 @@ export class ProductionLineService {
           nombre: true,
           image: true,
           id_presentacion_web: true,
-        },
+          product_acabados: {
+            where: {
+              estado: 'VIGENTE',
+              val2: { not: 0 }
+            },
+            select: {
+              id_acabado: true,
+              val2: true
+            }
+          },
+          producto_presentacion_ofertas: {
+            select: { id: true }
+          }
+        }
       });
   
-      const formattedProducts = await Promise.all(
-        productos.map(async (product) => {
-          let valorFinal = 0;
-          let nombrePresentacion = '';
-          let cantidadPresentaciones = 0;
+      // 3. Obtener datos relacionados en paralelo
+      const presentationIds = productos.map(p => p.id_presentacion_web).filter(Boolean) as number[];
+      const productIds = productos.map(p => p.id);
   
-          if (product.id_presentacion_web) {
-            const presentation = await this.prisma.presentations.findUnique({
-              where: { id: product.id_presentacion_web },
-              select: { variacion: true, id_base: true, nombre: true },
-            });
+      const [presentations, allAcabados, presentationCounts] = await Promise.all([
+        this.prisma.presentations.findMany({
+          where: { id: { in: presentationIds } },
+          select: { id: true, nombre: true, variacion: true, id_base: true }
+        }),
+        this.prisma.product_acabados.findMany({
+          where: {
+            id_producto: { in: productIds },
+            estado: 'VIGENTE'
+          },
+          select: { id_acabado: true, id_producto: true }
+        }),
+        this.prisma.presentations.groupBy({
+          by: ['id_base'],
+          where: {
+            estado: 'ACTIVO',
+            is_web: 'SI'
+          },
+          _count: true
+        })
+      ]);
   
-            if (presentation) {
-              nombrePresentacion = presentation.nombre ?? '';
+      // 4. Crear estructuras de acceso rápido
+      const presentationMap = new Map(presentations.map(p => [p.id, p]));
+      const acabadosMap = allAcabados.reduce((acc, curr) => {
+        if (!acc[curr.id_producto]) acc[curr.id_producto] = new Set();
+        acc[curr.id_producto].add(curr.id_acabado);
+        return acc;
+      }, {});
+      const countMap = new Map(presentationCounts.map(pc => [pc.id_base, pc._count]));
   
-              const acabado = await this.prisma.product_acabados.findFirst({
-                where: {
-                  id_producto: product.id,
-                  id_acabado: presentation.id_base,
-                  estado: 'VIGENTE',
-                },
-                select: { val2: true },
-              });
+      // 5. Procesar productos
+      const formattedProducts = productos.map(product => {
+        const presentation = presentationMap.get(product.id_presentacion_web!);
+        let valorFinal = 0;
+        let cantidadPresentaciones = 0;
   
-              if (acabado) {
-                valorFinal = acabado.val2;
-                if (presentation.variacion && presentation.variacion !== 0) {
-                  valorFinal = valorFinal * (1 + presentation.variacion / 100);
-                }
-                valorFinal = Math.round(valorFinal);
-              }
-  
-              const productAcabados = await this.prisma.product_acabados.findMany({
-                where: {
-                  id_producto: product.id,
-                  estado: 'VIGENTE',
-                },
-                select: { id_acabado: true },
-              });
-  
-              const idAcabados = productAcabados.map((a) => a.id_acabado);
-  
-              cantidadPresentaciones = await this.prisma.presentations.count({
-                where: {
-                  estado: 'ACTIVO',
-                  is_web: 'SI',
-                  id_base: { in: idAcabados },
-                },
-              });
+        if (presentation) {
+          // Calcular valor final
+          const acabado = product.product_acabados.find(
+            pa => pa.id_acabado === presentation.id_base
+          );
+          
+          if (acabado?.val2) {
+            valorFinal = acabado.val2;
+            if (presentation.variacion) {
+              valorFinal = Math.round(valorFinal * (1 + presentation.variacion / 100));
             }
           }
   
-          return {
-            token: product.token,
-            nombre: product.nombre,
-            image: product.image,
-            valor: valorFinal,
-            presentacion: nombrePresentacion,
-            cantidad_presentaciones: cantidadPresentaciones - 1,
-          };
-        })
-      );
+          // Calcular presentaciones válidas
+          const acabadosProducto = [...(acabadosMap[product.id] || [])];
+          cantidadPresentaciones = acabadosProducto.reduce(
+            (sum, id) => sum + (countMap.get(id) || 0),
+            0
+          );
+        }
   
-      return [
-        {
-          id: productionLine.id,
-          nombre: productionLine.nombre,
-          slug: productionLine.slug,
-          products: formattedProducts,
-        },
-      ];
+        return {
+          token: product.token,
+          nombre: product.nombre,
+          image: product.image,
+          valor: valorFinal,
+          presentacion: presentation?.nombre || '',
+          cantidad_presentaciones: cantidadPresentaciones -1,
+          oferta: product.producto_presentacion_ofertas.length > 0
+        };
+      }).filter(p => p.valor > 0);
+  
+      return [{
+        id: productionLine.id,
+        nombre: productionLine.nombre,
+        slug: productionLine.slug,
+        products: formattedProducts
+      }];
+      
     } catch (error) {
-      console.error('Error fetching insumo with products:', error);
-      throw new Error('Failed to fetch insumo with products');
+      this.logger.error(`Error en findBySlug (líneas): ${error.message}`);
+      throw new InternalServerErrorException('Error al obtener línea de producción con productos');
     }
   }
 

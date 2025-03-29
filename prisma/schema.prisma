@@ -943,27 +943,28 @@ model personasss {
 }
 
 model presentations {
-  id                          Int                           @id @default(autoincrement())
-  alias                       String                        @db.VarChar(20)
-  nombre                      String?                       @db.VarChar(50)
-  slug                        String?                       @db.VarChar(100)
-  is_web                      presentations_is_web?         @default(NO)
-  estado                      presentations_estado?         @default(ACTIVO)
-  id_base                     Int
-  hexa                        String?                       @db.VarChar(15)
-  variacion                   Int                           @default(0)
-  data                        presentations_data            @default(DEPENDIENTE)
-  username_digita             String?                       @db.VarChar(50)
-  created_at                  DateTime?                     @db.DateTime(0)
-  username_modifica           String?                       @db.VarChar(50)
-  updated_at                  DateTime?                     @db.Timestamp(0)
-  acabados                    acabados                      @relation(fields: [id_base], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "presentations_ibfk_1")
-  product_presentation_images product_presentation_images[]
-  products                    products[]
-  resultados                  resultados[]
-  sale_details                sale_details[]
-  temp_details                temp_details[]
-  terminados                  terminados[]
+  id                            Int                             @id @default(autoincrement())
+  alias                         String                          @db.VarChar(20)
+  nombre                        String?                         @db.VarChar(50)
+  slug                          String?                         @db.VarChar(100)
+  is_web                        presentations_is_web?           @default(NO)
+  estado                        presentations_estado?           @default(ACTIVO)
+  id_base                       Int
+  hexa                          String?                         @db.VarChar(15)
+  variacion                     Int                             @default(0)
+  data                          presentations_data              @default(DEPENDIENTE)
+  username_digita               String?                         @db.VarChar(50)
+  created_at                    DateTime?                       @db.DateTime(0)
+  username_modifica             String?                         @db.VarChar(50)
+  updated_at                    DateTime?                       @db.Timestamp(0)
+  acabados                      acabados                        @relation(fields: [id_base], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "presentations_ibfk_1")
+  product_presentation_images   product_presentation_images[]
+  producto_presentacion_ofertas producto_presentacion_ofertas[]
+  products                      products[]
+  resultados                    resultados[]
+  sale_details                  sale_details[]
+  temp_details                  temp_details[]
+  terminados                    terminados[]
 
   @@index([id_base], map: "fk_base_presentation")
 }
@@ -1048,50 +1049,51 @@ model production_details {
 }
 
 model products {
-  id                          Int                           @id @default(autoincrement())
-  token                       String?                       @db.VarChar(45)
-  nombre                      String                        @db.VarChar(100)
-  slug                        String?                       @db.Text
-  category_id                 Int?                          @default(7)
-  descripcion                 String?                       @db.Text
-  info_adicional              String?                       @db.VarChar(50)
-  insumo_id                   Int?
-  peso                        Decimal                       @default(0.0) @db.Decimal(11, 1)
-  ancho                       Decimal?                      @default(0.0) @db.Decimal(11, 1)
-  alto                        Decimal?                      @default(0.0) @db.Decimal(11, 1)
-  grosor                      Decimal?                      @default(0.0) @db.Decimal(11, 1)
-  linea_id                    Int?                          @default(1)
-  clasifica_colletions_id     BigInt?
-  is_web                      products_is_web               @default(NO)
-  id_presentacion_web         Int?
-  cotizacion_refs             BigInt?
-  piezas                      Int                           @default(0)
-  image                       String?                       @db.VarChar(80)
-  image1                      String?                       @db.VarChar(80)
-  image2                      String?                       @db.VarChar(80)
-  image3                      String?                       @db.VarChar(80)
-  tipo_cliente                Int                           @default(1)
-  lineacom                    Int?                          @default(1)
-  estado                      products_estado?              @default(ACTIVO)
-  proceso                     products_proceso              @default(CREADO)
-  username_digita             String?                       @db.VarChar(30)
-  created_at                  DateTime?                     @db.Timestamp(0)
-  username_modifica           String?                       @db.VarChar(30)
-  updated_at                  DateTime?                     @db.Timestamp(0)
-  complementos                complementos[]
-  insumo_detalles             insumo_detalles[]
-  molde_temps                 molde_temps[]
-  moldes                      moldes[]
-  product_acabados            product_acabados[]
-  product_presentation_images product_presentation_images[]
-  clasifica_collections       clasifica_collections?        @relation(fields: [clasifica_colletions_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_collections")
-  presentations               presentations?                @relation(fields: [id_presentacion_web], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_presentation")
-  categories                  categories?                   @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "products_ibfk_1")
-  canal                       canal?                        @relation(fields: [lineacom], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "products_ibfk_2")
-  resultados                  resultados[]
-  sale_details                sale_details[]
-  temp_details                temp_details[]
-  terminados                  terminados[]
+  id                            Int                             @id @default(autoincrement())
+  token                         String?                         @db.VarChar(45)
+  nombre                        String                          @db.VarChar(100)
+  slug                          String?                         @db.Text
+  category_id                   Int?                            @default(7)
+  descripcion                   String?                         @db.Text
+  info_adicional                String?                         @db.VarChar(50)
+  insumo_id                     Int?
+  peso                          Decimal                         @default(0.0) @db.Decimal(11, 1)
+  ancho                         Decimal?                        @db.Decimal(11, 1)
+  alto                          Decimal?                        @db.Decimal(11, 1)
+  grosor                        Decimal?                        @db.Decimal(11, 1)
+  linea_id                      Int?                            @default(1)
+  clasifica_colletions_id       BigInt?
+  is_web                        products_is_web                 @default(NO)
+  id_presentacion_web           Int?
+  cotizacion_refs               BigInt?
+  piezas                        Int                             @default(0)
+  image                         String?                         @db.VarChar(80)
+  image1                        String?                         @db.VarChar(80)
+  image2                        String?                         @db.VarChar(80)
+  image3                        String?                         @db.VarChar(80)
+  tipo_cliente                  Int                             @default(1)
+  lineacom                      Int?                            @default(1)
+  estado                        products_estado?                @default(ACTIVO)
+  proceso                       products_proceso                @default(CREADO)
+  username_digita               String?                         @db.VarChar(30)
+  created_at                    DateTime?                       @db.Timestamp(0)
+  username_modifica             String?                         @db.VarChar(30)
+  updated_at                    DateTime?                       @db.Timestamp(0)
+  complementos                  complementos[]
+  insumo_detalles               insumo_detalles[]
+  molde_temps                   molde_temps[]
+  moldes                        moldes[]
+  product_acabados              product_acabados[]
+  product_presentation_images   product_presentation_images[]
+  producto_presentacion_ofertas producto_presentacion_ofertas[]
+  clasifica_collections         clasifica_collections?          @relation(fields: [clasifica_colletions_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_collections")
+  presentations                 presentations?                  @relation(fields: [id_presentacion_web], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_presentation")
+  categories                    categories?                     @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "products_ibfk_1")
+  canal                         canal?                          @relation(fields: [lineacom], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "products_ibfk_2")
+  resultados                    resultados[]
+  sale_details                  sale_details[]
+  temp_details                  temp_details[]
+  terminados                    terminados[]
 
   @@index([category_id], map: "FK_CATEGORIA_PRODUCTO")
   @@index([lineacom], map: "fk_canal_lineacom")
@@ -1445,6 +1447,23 @@ model zonas {
   id     Int    @id @default(autoincrement())
   nombre String @db.VarChar(25)
   tipo   String @db.VarChar(5)
+}
+
+model producto_presentacion_ofertas {
+  id                BigInt                               @id @default(autoincrement())
+  producto_id       Int
+  presentacion_id   Int
+  porcentaje        Decimal                              @default(0) @db.Decimal(4, 0)
+  estado            producto_presentacion_ofertas_estado @default(VIGENTE)
+  username_digita   String?                              @db.VarChar(80)
+  created_at        DateTime?                            @db.DateTime(0)
+  username_modifica String?                              @db.VarChar(80)
+  updated_at        DateTime?                            @db.DateTime(0)
+  presentations     presentations                        @relation(fields: [presentacion_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ppo_presentacion")
+  products          products                             @relation(fields: [producto_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_ppo_producto")
+
+  @@index([presentacion_id], map: "presentacion_id")
+  @@index([producto_id], map: "producto_id")
 }
 
 enum cotiza_moldes_diametro {
@@ -1915,4 +1934,9 @@ enum cotizacions_estado {
 enum presentations_is_web {
   SI
   NO
+}
+
+enum producto_presentacion_ofertas_estado {
+  VIGENTE
+  DESHABILITADO
 }

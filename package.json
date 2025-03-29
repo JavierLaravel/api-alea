@@ -27,6 +27,8 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^11.0.1",
     "@prisma/client": "^6.5.0",
+    "cache-manager": "^6.4.1",
+    "decimal.js": "^10.5.0",
     "json-bigint": "^1.0.0",
     "prisma": "^6.5.0",
     "reflect-metadata": "^0.2.2",
