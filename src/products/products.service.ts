@@ -380,6 +380,45 @@ export class ProductsService {
         };
       }
     }
+
+    async getDiscountsCount() {
+      try {
+        // Primero obtenemos los productos únicos con ofertas
+        const distinctProducts = await this.prisma.producto_presentacion_ofertas.findMany({
+          where: {
+            estado: 'VIGENTE',
+            products: {
+              estado: 'ACTIVO',
+              proceso: 'COMPLETO',
+              is_web: 'SI'
+            }
+          },
+          distinct: ['producto_id'], // Aquí sí funciona el distinct
+          select: {
+            producto_id: true
+          }
+        });
+    
+        // El conteo será la cantidad de elementos en el array
+        const count = distinctProducts.length;
+    
+        return {
+          status: 'success',
+          count: count,
+          data: { 
+            message: `Existen ${count} productos con ofertas activas` 
+          }
+        };
+    
+      } catch (error) {
+        this.logger.error(`Error contando ofertas activas: ${error.message}`);
+        return {
+          status: 'error',
+          count: 0,
+          data: { message: 'Error al obtener conteo de ofertas' }
+        };
+      }
+    }
   
   
 

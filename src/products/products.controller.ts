@@ -3,6 +3,7 @@ import { ProductsService } from './products.service';
 
 
 
+
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) { }
@@ -49,8 +50,13 @@ export class ProductsController {
   }
 
   @Get('/offers')
-  async getProductosEnOferta() {
+  async getProductsOnOffers() {
     return this.productsService.getDiscountedProducts();
+  }
+
+  @Get('/offers-count')
+  async getCountProductsOnOffers() {
+    return this.productsService.getDiscountsCount();
   }
 
   @Get(':token')
