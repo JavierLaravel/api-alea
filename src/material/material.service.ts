@@ -13,34 +13,19 @@ export class MaterialService {
 
   async findAll() {
     // Obtenemos todos los insumos
-    const material = await this.prisma.insumos.findMany({
+    const materials = await this.prisma.insumos.findMany({
       select: {
         id: true,
         nombre: true,
         slug: true,
       },
     });
-  
-    // Para cada insumo, contamos los productos relacionados que cumplen con las condiciones
-    const materialCount = await Promise.all(
-      material.map(async (material) => {
-        const count = await this.prisma.products.count({
-          where: {
-            insumo_id: material.id, // Filtramos por el insumo actual
-            estado: 'ACTIVO', // Solo productos activos
-            proceso: 'COMPLETO', // Solo productos completos
-            is_web: 'SI', // Solo productos disponibles en la web
-          },
-        });
-  
-        return {
-          ...material,
-          cantidad: count, // Agregamos el conteo al objeto del insumo
-        };
-      }),
-    );
-  
-    return materialCount;
+
+    return materials.map(material => ({
+      id_origen: material.id,
+      nombre: material.nombre,
+      slug: material.slug,
+    }));
   }
 
 

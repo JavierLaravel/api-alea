@@ -18,27 +18,15 @@ export class CategoriesService {
         id: true,
         nombre: true,
         slug: true,
-        products: {
-          select: {
-            id: true,
-          },
-          where: {
-            estado: 'ACTIVO',
-            proceso: 'COMPLETO',
-            is_web: 'SI',
-          },
-        },
-      },
-      where: {
-        estado: 'ACTIVO',
-      },
+        estado: true,
+      }
     });
 
     return collections.map((collection) => ({
-      id: collection.id,
+      id_origen: collection.id,
       nombre: collection.nombre,
       slug: collection.slug,
-      cantidad: collection.products.length,
+      estado: collection.estado,
     }));
   }
 

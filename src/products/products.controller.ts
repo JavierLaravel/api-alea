@@ -8,7 +8,7 @@ import { ProductsService } from './products.service';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) { }
 
-  /*@Get()
+  @Get()
   async findAll() {
     try {
       const products = await this.productsService.findAll();
@@ -26,7 +26,7 @@ export class ProductsController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-  }*/
+  }
 
   @Get('/related')
   async findRelated() {

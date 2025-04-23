@@ -20,27 +20,12 @@ export class ProductionLineService {
         slug: true,
       },
     });
-  
-    // Para cada insumo, contamos los productos relacionados que cumplen con las condiciones
-    const productionLineCount = await Promise.all(
-      productionLine.map(async (pline) => {
-        const count = await this.prisma.products.count({
-          where: {
-            linea_id: pline.id, // Filtramos por el insumo actual
-            estado: 'ACTIVO', // Solo productos activos
-            proceso: 'COMPLETO', // Solo productos completos
-            is_web: 'SI', // Solo productos disponibles en la web
-          },
-        });
-  
-        return {
-          ...pline,
-          cantidad: count, // Agregamos el conteo al objeto del insumo
-        };
-      }),
-    );
-  
-    return productionLineCount;
+
+    return productionLine.map(productionLine => ({
+      id_origen: productionLine.id,
+      nombre: productionLine.nombre,
+      slug: productionLine.slug,
+    }));
   }
 
   async findBySlug(slug: string) {

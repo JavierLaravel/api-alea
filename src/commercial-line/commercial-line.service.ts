@@ -14,16 +14,6 @@ export class CommercialLineService {
         id: true,
         nombre: true,
         slug: true,
-        products: {
-          select: {
-            id: true,
-          },
-          where: {
-            estado: 'ACTIVO',
-            proceso: 'COMPLETO',
-            is_web: 'SI',
-          },
-        },
       },
       where: {
         nombre: {
@@ -33,10 +23,9 @@ export class CommercialLineService {
     });
 
     return commercialLines.map((commercialLine) => ({
-      id: commercialLine.id,
+      id_origen: commercialLine.id,
       nombre: commercialLine.nombre,
       slug: commercialLine.slug,
-      cantidad: commercialLine.products.length,
     }));
   }
 

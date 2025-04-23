@@ -28,42 +28,25 @@ export class FinishesService {
         },
       });
 
+      
+
       const result = await Promise.all(
         presentations.map(async (pres) => {
-          try {
-            const cantidad = await this.prisma.products.count({
-              where: {
-                estado: 'ACTIVO',
-                proceso: 'COMPLETO',
-                is_web: 'SI',
-                product_acabados: {
-                  some: {
-                    estado: 'VIGENTE',
-                    id_acabado: pres.id_base,
-                  },
-                },
-              },
-            });
-
+          try {           
             return {
-              slug: pres.slug,
+              id_origen: pres.id,
               nombre: pres.nombre,
-              cantidad,
+              slug: pres.slug,
             };
           } catch (err) {
-            console.error(`Error contando productos para presentación ${pres.slug}`, err);
-            return {
-              slug: pres.slug,
-              nombre: pres.nombre,
-              cantidad: 0,
-            };
+            console.error(`Error contando productos para presentación ${pres.slug}`, err);           
           }
         }),
       );
 
       return result;
     } catch (error) {
-      console.error('Error al obtener presentaciones con productos:', error);
+      console.error('Error al obtener presentaciones', error);
       throw new InternalServerErrorException('Error al obtener las presentaciones');
     }
   }
