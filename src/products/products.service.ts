@@ -174,7 +174,7 @@ export class ProductsService {
           valordescuento: preferredPresentation?.valdescuento ?? 0,
           descuento: preferredPresentation?.descuento ?? false,
           porcentaje: preferredPresentation?.porcentaje ?? 0,
-          presentation_id: presentationWeb?.id ?? null,
+          presentation_id: presentationWeb?.id ?? 1,
 
           peso: product.peso?.toString() ?? '0',
           ancho: product.ancho?.toString() ?? null,
