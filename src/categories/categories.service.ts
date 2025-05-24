@@ -56,11 +56,11 @@ export class CategoriesService {
               product_acabados: {
                 where: {
                   estado: 'VIGENTE',
-                  val2: { not: 0 } // Primer ajuste: excluir val2 = 0
+                  val3: { not: 0 } // Primer ajuste: excluir val3 = 0
                 },
                 select: {
                   id_acabado: true,
-                  val2: true
+                  val3: true
                 }
               },
               producto_presentacion_ofertas: {
@@ -119,7 +119,7 @@ export class CategoriesService {
             );
             
             if (acabado) {
-              valorFinal = acabado.val2;
+              valorFinal = acabado.val3;
               if (presentation.variacion) {
                 valorFinal *= (1 + presentation.variacion / 100);
               }

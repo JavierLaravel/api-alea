@@ -57,11 +57,11 @@ export class MaterialService {
           product_acabados: {
             where: {
               estado: 'VIGENTE',
-              val2: { not: 0 }
+              val3: { not: 0 }
             },
             select: {
               id_acabado: true,
-              val2: true
+              val3: true
             }
           },
           producto_presentacion_ofertas: {
@@ -113,8 +113,8 @@ export class MaterialService {
             pa => pa.id_acabado === presentation.id_base
           );
           
-          if (acabado?.val2) {
-            valorFinal = acabado.val2;
+          if (acabado?.val3) {
+            valorFinal = acabado.val3;
             if (presentation.variacion) {
               valorFinal = Math.round(valorFinal * (1 + presentation.variacion / 100));
             }

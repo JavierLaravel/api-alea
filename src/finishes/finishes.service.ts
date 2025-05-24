@@ -72,7 +72,7 @@ export class FinishesService {
             some: {
               estado: 'VIGENTE',
               id_acabado: presentation.id_base,
-              val2: { not: 0 }
+              val3: { not: 0 }
             }
           }
         },
@@ -86,7 +86,7 @@ export class FinishesService {
               estado: 'VIGENTE',
               id_acabado: presentation.id_base
             },
-            select: { val2: true }
+            select: { val3: true }
           },
           producto_presentacion_ofertas: {
             select: { id: true }
@@ -123,11 +123,11 @@ export class FinishesService {
   
       // Paso 4: Calcular presentaciones por producto
       const productsResult = productos.map(product => {
-        const val2 = product.product_acabados[0]?.val2 ?? 0;
-        let valor = val2;
+        const val3 = product.product_acabados[0]?.val3 ?? 0;
+        let valor = val3;
   
         if (presentation.variacion) {
-          valor = Math.round(val2 * (1 + presentation.variacion / 100));
+          valor = Math.round(val3 * (1 + presentation.variacion / 100));
         }
   
         // Obtener acabados del producto actual

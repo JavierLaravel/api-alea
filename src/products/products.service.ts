@@ -28,11 +28,11 @@ export class ProductsService {
           product_acabados: {
             where: {
               estado: 'VIGENTE',
-              val2: { gt: 0 }, // Filtra val2 > 0
+              val3: { gt: 0 }, // Filtra val3 > 0
             },
             select: {
               id_acabado: true,
-              val2: true,
+              val3: true,
             },
             orderBy: {
               id_acabado: 'asc',
@@ -52,7 +52,7 @@ export class ProductsService {
         slug: product.slug,
         nombre: product.nombre,
         image: product.image,
-        valor: product.product_acabados.length > 0 ? product.product_acabados[0].val2 : null, // Tomar el primer product_acabado
+        valor: product.product_acabados.length > 0 ? product.product_acabados[0].val3 : null, // Tomar el primer product_acabado
       }));
 
       return formattedProducts;
@@ -78,7 +78,7 @@ export class ProductsService {
           product_acabados: {
             where: {
               estado: 'VIGENTE',
-              val2: { gt: 0 },
+              val3: { gt: 0 },
               acabados: {
                 presentations: {
                   some: {
@@ -128,7 +128,7 @@ export class ProductsService {
         const presentations = product.product_acabados.flatMap(pa =>
           pa.acabados.presentations.map(pres => {
             const imageEntry = pres.product_presentation_images.find(img => img.id_producto === product.id);
-            const baseValue = pa.val2;
+            const baseValue = pa.val3;
             const variation = pres.variacion || 0;
             const originalValue = Math.round(baseValue * (1 + variation / 100));
 
@@ -224,7 +224,7 @@ export class ProductsService {
           product_acabados: {
             where: {
               estado: 'VIGENTE',
-              val2: { gt: 0 },
+              val3: { gt: 0 },
               acabados: {
                 presentations: {
                   some: {
@@ -272,7 +272,7 @@ export class ProductsService {
 
       const presentations = product.product_acabados.flatMap(pa =>
         pa.acabados.presentations.map(pres => {
-          const baseValue = pa.val2;
+          const baseValue = pa.val3;
           const variation = pres.variacion || 0;
           const originalValue = Math.round(baseValue * (1 + variation / 100));
 
@@ -393,11 +393,11 @@ export class ProductsService {
                   id_acabado: presentation.id_base,
                   estado: 'VIGENTE',
                 },
-                select: { val2: true },
+                select: { val3: true },
               });
 
               if (acabado) {
-                valorFinal = acabado.val2;
+                valorFinal = acabado.val3;
                 if (presentation.variacion && presentation.variacion !== 0) {
                   valorFinal = valorFinal * (1 + presentation.variacion / 100);
                 }
@@ -458,11 +458,11 @@ export class ProductsService {
               product_acabados: {
                 where: {
                   estado: 'VIGENTE',
-                  val2: { not: 0 }
+                  val3: { not: 0 }
                 },
                 select: {
                   id_acabado: true,
-                  val2: true
+                  val3: true
                 }
               }
             }
@@ -486,7 +486,7 @@ export class ProductsService {
         select: {
           id_producto: true,
           id_acabado: true,
-          val2: true
+          val3: true
         }
       });
 
@@ -495,7 +495,7 @@ export class ProductsService {
         const basePrice = basePrices.find(
           bp => bp.id_producto === offer.producto_id &&
             bp.id_acabado === offer.presentations.id_base
-        )?.val2 || 0;
+        )?.val3 || 0;
 
         const variacion = offer.presentations.variacion || 0;
         const valorConVariacion = Math.round(basePrice * (1 + variacion / 100));
