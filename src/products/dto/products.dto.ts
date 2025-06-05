@@ -24,6 +24,8 @@ export class ProductPresentationDto {
     grosor: string | null;
     descripcion: string | null;
     estado: string | null;
+
+    fecha_creacion: Date | null;
   
     categories: {
       id: number;

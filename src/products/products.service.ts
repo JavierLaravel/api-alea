@@ -183,6 +183,8 @@ export class ProductsService {
           descripcion: product.descripcion,
           estado: product.estado,
 
+          fecha_creacion: product.created_at,
+
           production_line: product.linea_id,
           material: product.insumo_id,
           categories: product.categories,
