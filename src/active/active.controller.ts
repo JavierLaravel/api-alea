@@ -10,6 +10,7 @@ export class ActiveController {
 
   @Get()
   getOk(): string {
+    console.log('active');
     return 'ok';
   }
 }
