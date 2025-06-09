@@ -1,8 +1,10 @@
-import { Controller, Get, Param, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Param, HttpException, HttpStatus, UseGuards } from '@nestjs/common';
+import { ApiKeyGuard } from '../common/guards/api-key/api-key.guard'; 
 import { FinishesService } from './finishes.service';
 
 
 @Controller('finishes')
+@UseGuards(ApiKeyGuard)
 export class FinishesController {
   constructor(private readonly finishesService: FinishesService) {}
 

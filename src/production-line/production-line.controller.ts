@@ -1,8 +1,10 @@
-import { Controller, Get, Param, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Param, HttpException, HttpStatus, UseGuards } from '@nestjs/common';
+import { ApiKeyGuard } from '../common/guards/api-key/api-key.guard'; 
 import { ProductionLineService } from './production-line.service';
 
 
 @Controller('production-lines')
+@UseGuards(ApiKeyGuard)
 export class ProductionLineController {
 
   constructor(private readonly productionLineService: ProductionLineService) {}

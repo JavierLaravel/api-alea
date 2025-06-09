@@ -1,8 +1,10 @@
-import { Controller, Get, Param, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Param, HttpException, HttpStatus, UseGuards } from '@nestjs/common';
+import { ApiKeyGuard } from '../common/guards/api-key/api-key.guard'; 
 import { MaterialService } from './material.service';
 
 
 @Controller('materials')
+@UseGuards(ApiKeyGuard)
 export class MaterialController {
   constructor(private readonly materialService: MaterialService) {}
 

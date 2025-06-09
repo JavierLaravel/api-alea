@@ -1,8 +1,11 @@
-import { Controller, Get, Param, HttpException, HttpStatus  } from '@nestjs/common';
+import { Controller, Get, Param, HttpException, HttpStatus, UseGuards  } from '@nestjs/common';
+import { ApiKeyGuard } from '../common/guards/api-key/api-key.guard'; 
 import { CategoriesService } from './categories.service';
 
 
 @Controller('categories')
+@UseGuards(ApiKeyGuard)
+
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
