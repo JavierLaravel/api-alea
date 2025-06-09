@@ -11,6 +11,7 @@ import { CommercialLineModule } from './commercial-line/commercial-line.module';
 import { MaterialModule } from './material/material.module';
 import { ProductionLineModule } from './production-line/production-line.module';
 import { FinishesModule } from './finishes/finishes.module';
+import { ActiveModule } from './active/active.module';
 
 
 @Module({
@@ -23,6 +24,7 @@ import { FinishesModule } from './finishes/finishes.module';
     MaterialModule,
     ProductionLineModule,
     FinishesModule,
+    ActiveModule,
 
   ],
   controllers: [AppController],
