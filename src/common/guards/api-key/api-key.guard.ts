@@ -14,7 +14,7 @@ export class ApiKeyGuard implements CanActivate {
     const validKey = process.env.API_KEY;
 
     if (!apiKey || apiKey !== validKey) {
-      //console.warn('🚫 API Key inválida o faltante:', apiKey);
+      console.warn('🚫 API Key inválida o faltante:', apiKey);
       throw new UnauthorizedException('API Key inválida');
     }
 
