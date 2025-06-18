@@ -15,6 +15,7 @@ export class PersonsService {
     });
 
     const ciudad = dto.ciudad?.toUpperCase() ?? null;
+    const departamento = dto.departamento?.toUpperCase() ?? null;
     const pais = dto.pais?.toUpperCase() ?? null;
     const direccion = dto.direccion?.toUpperCase() ?? null;
     const nombre = dto.nombre?.toUpperCase() ?? null;
@@ -29,6 +30,7 @@ export class PersonsService {
           direccion,
           email: dto.email ?? null,
           ciudad,
+          departamento,
           pais,
           telefono: dto.telefono ?? null,
           observacion,
