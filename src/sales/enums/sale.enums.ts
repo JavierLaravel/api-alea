@@ -14,4 +14,5 @@ export enum EstadoVenta {
     CREDITO = 'CREDITO',
     ANTICIPADO = 'ANTICIPADO',
     REPOSICION = 'REPOSICION',
+    WEB = 'WEB',
   }
