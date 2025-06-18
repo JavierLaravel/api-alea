@@ -1864,6 +1864,7 @@ enum sales_formapago {
   CREDITO
   ANTICIPADO
   REPOSICION
+  WEB
 }
 
 enum sale_details_existe {

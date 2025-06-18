@@ -62,7 +62,7 @@ export class SalesService {
           fecha_entrega: addDays(new Date(), 15),
           estado: 'PENDIENTE',
           detalle: dto.detalle ?? null,
-          formapago: dto.formapago,
+          formapago: dto.formapago ,
           user_id: 1,
           created_at: new Date(),
           username_digita: 'WEB ALEA',
